@@ -1,0 +1,5 @@
+# bash better auto-completion
+# `man readline`
+set show-all-if-ambiguous on
+set completion-ignore-case on
+set completion-map-case on
