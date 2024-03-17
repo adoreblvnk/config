@@ -19,6 +19,7 @@
     "hediet.vscode-drawio.theme": "Kennedy",
     "python.analysis.completeFunctionParens": true,
     "telemetry.telemetryLevel": "off",
+    "terminal.integrated.fontSize": 16,
     "window.menuBarVisibility": "toggle",
     "workbench.colorTheme": "One Dark Pro",
     "workbench.settings.enableNaturalLanguageSearch": false,
