@@ -1,12 +1,12 @@
 <div align="center">
-    <img src="<logo_path>" width=100> <!-- Logo -->
-    <h1>Project Template</h1> <!-- Title -->
-    <p>
-      Description.
-    </p> <!-- Description -->
-    <p>
-      Built With: &bull;
-    </p> <!-- Built With -->
+  <img src="<logo_path>" width=100> <!-- Logo -->
+  <h1>Project Template</h1> <!-- Title -->
+  <p>
+    Description.
+  </p> <!-- Description -->
+  <p>
+    Built With: &bull;
+  </p> <!-- Built With -->
 </div>
 
 ---
