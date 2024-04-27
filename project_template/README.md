@@ -52,4 +52,6 @@ Distributed under the MIT License.
 
 - [adore_blvnk](https://x.com/adore_blvnk)
 
+## Acknowledgements  <!-- omit in toc -->
+
 <!-- Inspired by Best-README-Template (https://github.com/othneildrew/Best-README-Template) -->
