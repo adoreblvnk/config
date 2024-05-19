@@ -1,0 +1,9 @@
+import = [
+    "~/.config/alacritty/themes/themes/catppuccin_frappe.toml"
+]
+
+[window]
+dimensions = { columns = 160, lines = 50 }
+padding = { x = 3, y = 3 }
+dynamic_padding = true
+opacity = 0.9

@@ -1,0 +1,17 @@
+#!/bin/bash 
+# /usr/bin
+
+set -euo pipefail
+
+# ----- Apt -----
+
+sudo apt-get update
+sudo apt-get upgrade -y
+sudo apt-get autoclean -y
+sudo apt-get autoremove -y
+
+# ----- Flatpak -----
+flatpak update -y
+
+# ----- Cargo -----
+cargo install-update -a
