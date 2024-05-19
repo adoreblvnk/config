@@ -1,5 +1,5 @@
 adpyke.codesnap
-akamud.vscode-theme-onelight
+catppuccin.catppuccin-vsc
 christian-kohler.path-intellisense
 eamodio.gitlens
 ecmel.vscode-html-css
@@ -13,4 +13,3 @@ redhat.vscode-yaml
 streetsidesoftware.code-spell-checker
 wayou.vscode-todo-highlight
 yzhang.markdown-all-in-one
-zhuangtongfa.material-theme
