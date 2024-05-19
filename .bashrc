@@ -57,16 +57,7 @@ if [ -n "$force_color_prompt" ]; then
 fi
 
 if [ "$color_prompt" = yes ]; then
-    # bash prompt w/ git branch
-    source ~/.git-prompt.sh
-    # display chroot name if in chroot
-    PS1='${debian_chroot:+($debian_chroot)}'
-    # add working directory in blue
-    PS1+='\[\033[01;34m\]\w\[\033[00m\]'
-    # add git branch if exists in brown
-    PS1+='\[\033[01;33m\]$(__git_ps1)\[\033[00m\] '
-    # prompt symbol in purple
-    PS1+='\[\033[01;35m\]\$\[\033[00m\] '
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 else
     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 fi
@@ -125,5 +116,23 @@ if ! shopt -oq posix; then
   fi
 fi
 
+# bash prompt w/ git branch
+source ~/.git-prompt.sh
+# display chroot name if in chroot
+PS1='${debian_chroot:+($debian_chroot)}'
+# add working directory
+PS1+='\[\033[01;34m\]\w\[\033[00m\]'
+# add git branch if exists
+PS1+='\[\033[01;33m\]$(__git_ps1)\[\033[00m\] '
+# prompt symbol
+PS1+='\[\033[01;35m\]\$\[\033[00m\] '
 
+# force GPG to use pinentry (console) to prompt for passwords instead of a
+# window as per `man gpg-agent`
+export GPG_TTY=$(tty)
 
+. "$HOME/.cargo/env"
+# https://github.com/alacritty/alacritty/blob/master/INSTALL.md#bash
+source ~/.bash_completion/alacritty
+# https://github.com/ajeetdsouza/zoxide?tab=readme-ov-file#installation
+eval "$(zoxide init bash)"
