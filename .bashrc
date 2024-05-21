@@ -117,6 +117,9 @@ if ! shopt -oq posix; then
 fi
 
 # bash prompt w/ git branch
+if [ ! -f ~/.git-prompt.sh ]; then
+  curl -fsLS -o .git-prompt.sh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
+fi
 source ~/.git-prompt.sh
 # display chroot name if in chroot
 PS1='${debian_chroot:+($debian_chroot)}'
