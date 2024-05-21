@@ -13,5 +13,6 @@ sudo apt-get autoremove -y
 # ----- Flatpak -----
 flatpak update -y
 
-# ----- Cargo -----
+# ----- Rust -----
+rustup update
 cargo install-update -a
