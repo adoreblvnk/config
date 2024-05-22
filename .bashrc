@@ -118,7 +118,7 @@ fi
 
 # bash prompt w/ git branch
 if [ ! -f ~/.git-prompt.sh ]; then
-  curl -fsLS -o .git-prompt.sh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
+  curl -fsLS -o .git-prompt.sh https://github.com/git/git/raw/master/contrib/completion/git-prompt.sh
 fi
 source ~/.git-prompt.sh
 # display chroot name if in chroot
@@ -139,6 +139,4 @@ export GPG_TTY=$(tty)
 source ~/.bash_completion/alacritty
 # https://github.com/ajeetdsouza/zoxide?tab=readme-ov-file#installation
 eval "$(zoxide init bash)"
-if command -v tmux &> /dev/null; then
-  tmux new-session -A -s main
-fi
+if command -v tmux &> /dev/null; then tmux new-session -A -s main; fi
