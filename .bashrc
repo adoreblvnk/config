@@ -139,4 +139,6 @@ export GPG_TTY=$(tty)
 source ~/.bash_completion/alacritty
 # https://github.com/ajeetdsouza/zoxide?tab=readme-ov-file#installation
 eval "$(zoxide init bash)"
-tmux new-session -A -s main
+if command -v tmux &> /dev/null; then
+  tmux new-session -A -s main
+fi
