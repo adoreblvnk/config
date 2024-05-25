@@ -8,3 +8,6 @@ dimensions = { columns = 160, lines = 50 }
 padding = { x = 3, y = 3 }
 dynamic_padding = true
 opacity = 0.95
+
+[cursor]
+style = { blinking = "On" }

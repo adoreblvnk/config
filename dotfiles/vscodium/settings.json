@@ -2,16 +2,24 @@
     "[html]": {
         "editor.defaultFormatter": "vscode.html-language-features"
     },
-    "[jsonc]": {},
-    "[markdown]": {
+    "[javascript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[jsonc]": {},
+    "[markdown]": {
+        "editor.defaultFormatter": "yzhang.markdown-all-in-one"
+    },
     "codesnap.showLineNumbers": false,
+    "editor.cursorBlinking": "expand",
     "editor.fontSize": 16,
     "editor.minimap.enabled": false,
     "editor.tabCompletion": "on",
     "editor.wordWrap": "on",
     "explorer.confirmDelete": false,
+    "explorer.confirmDragAndDrop": false,
     "files.exclude": {
         "**/.git": false
     },
@@ -21,7 +29,7 @@
     "telemetry.telemetryLevel": "off",
     "terminal.integrated.fontSize": 16,
     "window.menuBarVisibility": "toggle",
-    "workbench.colorTheme": "One Dark Pro",
+    "workbench.colorTheme": "Catppuccin Frappé",
     "workbench.settings.enableNaturalLanguageSearch": false,
     "workbench.startupEditor": "none",
     "zenMode.centerLayout": false,
