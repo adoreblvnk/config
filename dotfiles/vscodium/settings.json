@@ -8,7 +8,6 @@
     "[json]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-    "[jsonc]": {},
     "[markdown]": {
         "editor.defaultFormatter": "yzhang.markdown-all-in-one"
     },
@@ -26,6 +25,7 @@
     "git.enableCommitSigning": true,
     "hediet.vscode-drawio.theme": "Kennedy",
     "python.analysis.completeFunctionParens": true,
+    "shellformat.flag": "-i 2 -ci -bn",
     "telemetry.telemetryLevel": "off",
     "terminal.integrated.fontSize": 16,
     "window.menuBarVisibility": "toggle",

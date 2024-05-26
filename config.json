@@ -1,0 +1,8 @@
+{
+  "install": {},
+  "update": {
+    "aptFull": true,
+    "flatpak": true,
+    "rust": true
+  }
+}
