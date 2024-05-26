@@ -139,4 +139,5 @@ export GPG_TTY=$(tty)
 source ~/.bash_completion/alacritty
 # https://github.com/ajeetdsouza/zoxide?tab=readme-ov-file#installation
 eval "$(zoxide init bash)"
-if command -v tmux &> /dev/null; then tmux new-session -A -s main; fi
+# autostart in Zellij is undocumented & cannot attach to custom sessions https://zellij.dev/documentation/integration.html
+if [[ -z "$ZELLIJ" ]]; then zellij a -c main; fi

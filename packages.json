@@ -1,0 +1,15 @@
+{
+  "deps": {
+    "apt": []
+  },
+  "firmware": {},
+  "bettercli": {
+    "apt": []
+  },
+  "dev": {
+    "apt": []
+  },
+  "utils": {},
+  "personal": {},
+  "theme": {}
+}
