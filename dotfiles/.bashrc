@@ -140,4 +140,5 @@ source ~/.bash_completion/alacritty
 # https://github.com/ajeetdsouza/zoxide?tab=readme-ov-file#installation
 eval "$(zoxide init bash)"
 # autostart in Zellij is undocumented & cannot attach to custom sessions https://zellij.dev/documentation/integration.html
-if [[ -z "$ZELLIJ" ]]; then zellij a -c main; fi
+# added sleep to patch bug where zellij does not resize https://github.com/zellij-org/zellij/issues/2126
+if [[ -z "$ZELLIJ" ]]; then sleep 0.1; zellij a -c main; fi
