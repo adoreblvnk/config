@@ -1,8 +1,53 @@
 {
-  "install": {},
+  "install": {
+    "apt": {
+      "dependencies": [
+        "apt-transport-https",
+        "bash-completion",
+        "build-essential",
+        "clang",
+        "cmake",
+        "ffmpeg",
+        "git",
+        "gnupg2",
+        "jq",
+        "libffi-dev",
+        "libgdbm-dev",
+        "libjpeg-dev",
+        "libncurses5-dev",
+        "libnss3-dev",
+        "libpng-dev",
+        "libreadline-dev",
+        "libssl-dev",
+        "libtiff-dev",
+        "openssh-server",
+        "pavucontrol",
+        "pkgconf",
+        "software-properties-common",
+        "stow",
+        "ttf-mscorefonts-installer",
+        "vim",
+        "xclip"
+      ],
+      "firmware": [],
+      "dev": ["bat", "btop", "fzf"],
+      "apps": ["imagemagick", "vlc"],
+      "theme": ["nautilus", "plank"]
+    },
+    "flatpak": {},
+    "cargo": {}
+  },
   "update": {
     "aptFull": true,
     "flatpak": true,
     "rust": true
+  },
+  "configure": {
+    "packages": {
+      "bash": true,
+      "alacritty": true,
+      "zellij": true,
+      "codium": true
+    }
   }
 }
