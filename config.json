@@ -1,4 +1,19 @@
 {
+  "check": {
+    "apt": [],
+    "python": {
+      "version": 3.10,
+      "ppa": "",
+      "pkgs": [],
+      "pip": {
+        "installCmd": "curl bootstrap.pypa.io/get-pip.py"
+      }
+    },
+    "rust": {
+      "installCmd": ""
+    },
+    "firmware": ""
+  },
   "install": {
     "apt": {
       "dependencies": [
@@ -29,10 +44,14 @@
         "vim",
         "xclip"
       ],
-      "firmware": [],
-      "dev": ["bat", "btop", "fzf"],
-      "apps": ["imagemagick", "vlc"],
-      "theme": ["nautilus", "plank"]
+      "bat": true,
+      "btop": true,
+      "fzf": true,
+      "imagemagick": true,
+      "vlc" : true,
+      "nautilus": true,
+      "plank": true
+
     },
     "flatpak": {},
     "cargo": {}
@@ -40,10 +59,11 @@
   "update": {
     "aptFull": true,
     "flatpak": true,
-    "rust": true
+    "pip": true,
+    "cargo": true
   },
   "configure": {
-    "packages": {
+    "dotfiles": {
       "bash": true,
       "alacritty": true,
       "zellij": true,
