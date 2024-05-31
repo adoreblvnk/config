@@ -1,60 +1,54 @@
 {
   "check": {
-    "apt": [],
+    "apt": [
+      "apt-transport-https",
+      "bash-completion",
+      "build-essential",
+      "clang",
+      "cmake",
+      "ffmpeg",
+      "git",
+      "gnupg2",
+      "jq",
+      "libffi-dev",
+      "libgdbm-dev",
+      "libjpeg-dev",
+      "libncurses5-dev",
+      "libncursesw5-dev",
+      "libnss3-dev",
+      "libpng-dev",
+      "libreadline-dev",
+      "libssl-dev",
+      "libtiff-dev",
+      "openssh-server",
+      "pavucontrol",
+      "pkgconf",
+      "software-properties-common",
+      "stow",
+      "ttf-mscorefonts-installer",
+      "vim",
+      "xclip",
+      "libsqlite3-dev",
+      "xz-utils",
+      "tk-dev",
+      "libxml2-dev",
+      "libxmlsec1-dev",
+      "libffi-dev",
+      "liblzma-dev"
+    ],
     "python": {
-      "version": 3.10,
-      "ppa": "",
-      "pkgs": [],
-      "pip": {
-        "installCmd": "curl bootstrap.pypa.io/get-pip.py"
-      }
+      "pyenvCheck": true,
+      "version": 3.12
     },
     "rust": {
-      "installCmd": ""
+      "rustupCheck": true
     },
     "firmware": ""
   },
   "install": {
-    "apt": {
-      "dependencies": [
-        "apt-transport-https",
-        "bash-completion",
-        "build-essential",
-        "clang",
-        "cmake",
-        "ffmpeg",
-        "git",
-        "gnupg2",
-        "jq",
-        "libffi-dev",
-        "libgdbm-dev",
-        "libjpeg-dev",
-        "libncurses5-dev",
-        "libnss3-dev",
-        "libpng-dev",
-        "libreadline-dev",
-        "libssl-dev",
-        "libtiff-dev",
-        "openssh-server",
-        "pavucontrol",
-        "pkgconf",
-        "software-properties-common",
-        "stow",
-        "ttf-mscorefonts-installer",
-        "vim",
-        "xclip"
-      ],
-      "bat": true,
-      "btop": true,
-      "fzf": true,
-      "imagemagick": true,
-      "vlc" : true,
-      "nautilus": true,
-      "plank": true
-
-    },
-    "flatpak": {},
-    "cargo": {}
+    "apt": ["bat", "btop", "fzf", "imagemagick", "vlc", "nautilus", "plank"],
+    "flatpak": [],
+    "cargo": []
   },
   "update": {
     "aptFull": true,

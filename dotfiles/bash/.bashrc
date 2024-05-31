@@ -135,6 +135,11 @@ PS1+='\[\033[01;35m\]\$\[\033[00m\] '
 # window as per `man gpg-agent`
 export GPG_TTY=$(tty)
 
+# https://github.com/pyenv/pyenv-installer?tab=readme-ov-file#installation--update--uninstallation
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv virtualenv-init -)"
+
 if command -v cargo &>/dev/null; then . "$HOME/.cargo/env"; fi
 
 if [ ! -f ~/.bash_completion/alacritty ]; then

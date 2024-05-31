@@ -6,6 +6,7 @@ ecmel.vscode-html-css
 esbenp.prettier-vscode
 foxundermoon.shell-format
 hediet.vscode-drawio
+ms-python.black-formatter
 ms-python.debugpy
 ms-python.isort
 ms-python.python

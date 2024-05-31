@@ -11,6 +11,9 @@
     "[markdown]": {
         "editor.defaultFormatter": "yzhang.markdown-all-in-one"
     },
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
     "codesnap.showLineNumbers": false,
     "editor.cursorBlinking": "expand",
     "editor.fontSize": 16,
@@ -24,10 +27,12 @@
     },
     "git.enableCommitSigning": true,
     "hediet.vscode-drawio.theme": "Kennedy",
+    "javascript.suggest.completeFunctionCalls": true,
     "python.analysis.completeFunctionParens": true,
     "shellformat.flag": "-i 2 -ci -bn",
     "telemetry.telemetryLevel": "off",
     "terminal.integrated.fontSize": 16,
+    "typescript.suggest.completeFunctionCalls": true,
     "window.menuBarVisibility": "toggle",
     "workbench.colorTheme": "Catppuccin Frappé",
     "workbench.settings.enableNaturalLanguageSearch": false,

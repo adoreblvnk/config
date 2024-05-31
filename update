@@ -18,12 +18,12 @@ if $(jq '.update.aptFull' config.json); then
 fi
 
 # ----- Flatpak -----
-if $(jq '.update.flatpak' config.json) && command -v flatpak; then
+if $(jq '.update.flatpak' config.json) && command -v flatpak &>/dev/null; then
   flatpak update -y
 fi
 
 # ----- Rust -----
-if $(jq '.update.rust' config.json) && command -v rustup; then
+if $(jq '.update.rust' config.json) && command -v rustup &>/dev/null; then
   rustup update
   cargo install-update -a
 fi
