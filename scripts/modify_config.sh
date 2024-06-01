@@ -1,5 +1,5 @@
 #!/bin/bash
-# /usr/bin
+# run as `./scripts/modify_config.sh`
 
 config="config.json"
 deps_file="deps.list"

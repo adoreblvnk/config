@@ -3,27 +3,73 @@
 
 set -euo pipefail
 
-if ! command -v jq &>/dev/null; then
-  sudo apt-get update
-  sudo apt-get install jq
-fi
+usage() {
+  cat <<EOF
+TIDES (The Idempotent Dev Environment Setup) is a post-install, update, & dotfile manager
 
-# ----- Apt -----
+Usage: tides [OPTIONS]
 
-sudo apt-get update -qq
-sudo apt-get upgrade -qy
-if $(jq '.update.aptFull' config.json); then
-  sudo apt-get autoclean -qqy
-  sudo apt-get autoremove -qqy
-fi
+Commands:
+  check         Installs dependencies, Python (via pyenv), Cargo (via rustup), & firmware packages
+  install, i    Installs all packages. Auto-invokes \`configure\` when done
+  update, u     Updates & upgrades apt, flatpak, cargo, pip packages
+  configure, c  Dotfile manager (via Stow)
+  help, h       Print help information
 
-# ----- Flatpak -----
-if $(jq '.update.flatpak' config.json) && command -v flatpak &>/dev/null; then
-  flatpak update -y
-fi
+Configuration:
+  Customise each command's behaviour by modifying the \`config.json\` file.
+  Optionally, packages to be installed can be managed via \`deps.list\` & \`install.list\` text file.
+  Read the documentation at \`README.md\` for more details
 
-# ----- Rust -----
-if $(jq '.update.rust' config.json) && command -v rustup &>/dev/null; then
-  rustup update
-  cargo install-update -a
-fi
+Example:
+  tides configure
+
+EOF
+}
+
+error_msg() {
+  cat <<EOF
+Error: Invalid argument(s)
+
+EOF
+}
+
+main() {
+  [[ $# -gt 0 ]] || {
+    usage
+    error_msg
+    exit 1
+  }
+
+  while true; do
+    case $1 in
+      check)
+        echo check
+        shift
+        ;;
+      install | i)
+        echo install
+        shift
+        ;;
+      update | u)
+        echo update
+        shift
+        ;;
+      configure | c)
+        echo configure
+        shift
+        ;;
+      help | h)
+        usage
+        exit 0
+        ;;
+      *)
+        usage
+        error_msg
+        exit 1
+        ;;
+    esac
+  done
+}
+
+main "$@"
