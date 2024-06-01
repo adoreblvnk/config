@@ -4,8 +4,8 @@
 set -euo pipefail
 
 if ! command -v jq &>/dev/null; then
-  sudo apt-get update
-  sudo apt-get install jq
+  sudo apt-get -qq update
+  sudo apt-get -qy install jq
 fi
 
 # ----- Apt -----
