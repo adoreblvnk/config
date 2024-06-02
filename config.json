@@ -45,6 +45,7 @@
     "firmware": ""
   },
   "install": {
+    "check": true,
     "apt": [
       "bat",
       "btop",
@@ -62,12 +63,14 @@
     "cargo": []
   },
   "update": {
+    "check": false,
     "aptFull": true,
     "flatpak": true,
     "pip": true,
     "cargo": true
   },
   "configure": {
+    "check": true,
     "dotfiles": {
       "bash": true,
       "alacritty": true,

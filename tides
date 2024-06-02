@@ -19,7 +19,7 @@ Commands:
 Configuration:
   Customise each command's behaviour by modifying the \`config.json\` file.
   Optionally, packages to be installed can be managed via \`deps.list\` & \`install.list\` text file.
-  The config schema of `config.json` is available at \`README.md\`.
+  The config schema of $(config.json) is available at \`README.md\`.
 
 Example:
   tides configure
@@ -34,6 +34,26 @@ Error: Invalid argument(s)
 EOF
 }
 
+check() {
+  echo check
+}
+
+install() {
+  echo install
+}
+
+update() {
+  inner() {
+    varr="hihi"
+    echo $varr
+  }
+  inner
+}
+
+configure() {
+  echo configure
+}
+
 main() {
   [[ $# -gt 0 ]] || {
     usage
@@ -41,23 +61,19 @@ main() {
     exit 1
   }
 
-  while true; do
+  while [[ $# -gt 0 ]]; do
     case $1 in
       check)
-        echo check
-        shift
+        check
         ;;
       install | i)
-        echo install
-        shift
+        install
         ;;
       update | u)
-        echo update
-        shift
+        update
         ;;
       configure | c)
-        echo configure
-        shift
+        configure
         ;;
       help | h)
         usage
@@ -69,6 +85,7 @@ main() {
         exit 1
         ;;
     esac
+    shift
   done
 }
 

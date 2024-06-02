@@ -7,6 +7,6 @@ alias cat="batcat -pp"
 
 # eza aliases
 alias ls="eza --group-directories-first"
-alias la="eza -a --group-directories-first"
-alias ll="eza -al --group-directories-first"
-alias tree="eza -T --group-directories-first"
+alias la="eza --group-directories-first -a"
+alias ll="eza --group-directories-first -al"
+alias tree="eza --group-directories-first -T"

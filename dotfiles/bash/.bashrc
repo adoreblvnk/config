@@ -135,18 +135,22 @@ PS1+='\[\033[01;35m\]\$\[\033[00m\] '
 # window as per `man gpg-agent`
 export GPG_TTY=$(tty)
 
-# https://github.com/pyenv/pyenv-installer?tab=readme-ov-file#installation--update--uninstallation
-export PATH="$HOME/.pyenv/bin:$PATH"
-eval "$(pyenv init --path)"
-eval "$(pyenv virtualenv-init -)"
-
-if command -v cargo &>/dev/null; then . "$HOME/.cargo/env"; fi
-
-if [ ! -f ~/.bash_completion/alacritty ]; then
-  curl -fsLS --create-dirs -o ~/.bash_completion/alacritty \
-    https://github.com/alacritty/alacritty/raw/master/extra/completions/alacritty.bash
+if [ -d "$HOME/.pyenv" ]; then
+  # https://github.com/pyenv/pyenv-installer?tab=readme-ov-file#installation--update--uninstallation
+  export PATH="$HOME/.pyenv/bin:$PATH"
+  eval "$(pyenv init -)"
+  eval "$(pyenv virtualenv-init -)"
 fi
-source ~/.bash_completion/alacritty
+
+if [ -f "$HOME/.cargo/env" ]; then . "$HOME/.cargo/env"; fi
+
+if command -v alacritty &>/dev/null; then
+  if [ ! -f ~/.bash_completion/alacritty ]; then
+    curl -fsLS --create-dirs -o ~/.bash_completion/alacritty \
+      https://github.com/alacritty/alacritty/raw/master/extra/completions/alacritty.bash
+  fi
+  source ~/.bash_completion/alacritty
+fi
 
 # https://github.com/ajeetdsouza/zoxide?tab=readme-ov-file#installation
 if command -v zoxide &>/dev/null; then eval "$(zoxide init bash)"; fi
