@@ -66,8 +66,32 @@
       "vlc",
       "xclip"
     ],
+    "ppa": [
+      {
+        "name": "qbittorrent",
+        "ppa": "ppa:qbittorrent-team/qbittorrent-stable",
+        "packages": ["qbittorrent"]
+      }
+    ],
+    "aptAltSources": [
+      {
+        "name": "Codium",
+        "remoteGpgKey": "https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg",
+        "gpgKeyPath": "/usr/share/keyrings/vscodium-archive-keyring.gpg",
+        "repo": "deb [ signed-by=/usr/share/keyrings/vscodium-archive-keyring.gpg ] https://download.vscodium.com/debs vscodium main",
+        "packages": [
+          "codium"
+        ]
+      }
+    ],
     "flatpak": [],
-    "cargo": []
+    "cargo": [],
+    "deb": [
+      {
+        "name": "Obsidian",
+        "url": "https://github.com/obsidianmd/obsidian-releases/releases/latest/download/obsidian_$(curl -sL https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest | jq -r '.name')_amd64.deb"
+      }
+    ]
   },
   "update": {
     "check": false,
