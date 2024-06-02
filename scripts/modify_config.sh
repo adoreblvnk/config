@@ -27,4 +27,4 @@ config_to_install() {
   jq -r '.install.apt[]' $config >$install_file
 }
 
-install_to_config
+deps_to_config

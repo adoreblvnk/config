@@ -3,6 +3,11 @@
 
 set -euo pipefail
 
+# constants
+config="config.json"
+deps_file="deps.list"
+install_file="install.list"
+
 usage() {
   cat <<EOF
 TIDES (The Idempotent Dev Environment Setup) is a post-install, update, & dotfile manager
@@ -43,11 +48,35 @@ install() {
 }
 
 update() {
-  inner() {
-    varr="hihi"
-    echo $varr
-  }
-  inner
+  # update apt
+  sudo apt-get -qq update
+  sudo apt-get -qy upgrade
+
+  # aptFull removes old archive files & unused packages with their config files
+  if $(jq '.update.aptFull' "$config"); then
+    sudo apt-get -qy autoclean
+    sudo apt-get -qy --purge autoremove
+  fi
+
+  # update flatpak
+  if $(jq '.update.flatpak' "$config") && command -v flatpak &>/dev/null; then
+    flatpak update -y
+  fi
+
+  # update pip
+  if $(jq '.update.pip' "$config") && command -v pyenv &>/dev/null; then
+    # TODO: test if pyenv update updates python patch version too
+    pyenv update
+    local version=$(jq '.check.python.version' "$config")
+    python$version -m pip install --upgrade pip
+  fi
+
+  # update cargo
+  if $(jq '.update.cargo' "$config") && command -v rustup &>/dev/null; then
+    # update rust first
+    rustup update
+    cargo install-update -a
+  fi
 }
 
 configure() {

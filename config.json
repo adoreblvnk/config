@@ -5,6 +5,7 @@
       "apt-transport-https",
       "bash-completion",
       "build-essential",
+      "cmake",
       "curl",
       "ffmpeg",
       "flatpak",
@@ -29,6 +30,12 @@
       "libssh-dev",
       "libssl-dev",
       "pkgconf",
+      "# alacritty dependencies",
+      "libfontconfig1-dev",
+      "libfreetype6-dev",
+      "libxcb-xfixes0-dev",
+      "libxkbcommon-dev",
+      "pkg-config",
       "# imagemagick dependencies",
       "libjpeg-dev",
       "libpng-dev",
@@ -65,9 +72,9 @@
   "update": {
     "check": false,
     "aptFull": true,
-    "flatpak": true,
-    "pip": true,
-    "cargo": true
+    "flatpak": false,
+    "pip": false,
+    "cargo": false
   },
   "configure": {
     "check": true,
