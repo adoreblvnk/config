@@ -19,7 +19,7 @@ Commands:
 Configuration:
   Customise each command's behaviour by modifying the \`config.json\` file.
   Optionally, packages to be installed can be managed via \`deps.list\` & \`install.list\` text file.
-  Read the documentation at \`README.md\` for more details
+  The config schema of `config.json` is available at \`README.md\`.
 
 Example:
   tides configure
