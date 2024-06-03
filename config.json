@@ -92,7 +92,16 @@
       }
     ],
     "flatpak": [],
-    "cargo": [],
+    "cargo": [
+"alacritty",
+"bat",
+"bottom",
+"du-dust",
+"eza",
+"# starship",
+"zellij",
+"zoxide"
+],
     "deb": [
       {
         "name": "Obsidian",
