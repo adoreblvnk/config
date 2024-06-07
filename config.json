@@ -74,34 +74,36 @@
       }
     ],
     "aptAltSources": [
-{
-"remoteGpgKey": "https://download.docker.com/linux/ubuntu/gpg",
-"gpgKeyPath": "/etc/apt/keyrings/docker.asc",
-"repo": "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo '$VERSION_CODENAME') stable",
-"packages": [
-"docker-ce", "docker-ce-cli", "containerd.io", "docker-buildx-plugin", "docker-compose-plugin"
-]
-},
+      {
+        "remoteGpgKey": "https://download.docker.com/linux/ubuntu/gpg",
+        "gpgKeyPath": "/etc/apt/keyrings/docker.asc",
+        "repo": "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo '$VERSION_CODENAME') stable",
+        "packages": [
+          "docker-ce",
+          "docker-ce-cli",
+          "containerd.io",
+          "docker-buildx-plugin",
+          "docker-compose-plugin"
+        ]
+      },
       {
         "remoteGpgKey": "https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg",
         "gpgKeyPath": "/usr/share/keyrings/vscodium-archive-keyring.gpg",
         "repo": "deb [ signed-by=/usr/share/keyrings/vscodium-archive-keyring.gpg ] https://download.vscodium.com/debs vscodium main",
-        "packages": [
-          "codium"
-        ]
+        "packages": ["codium"]
       }
     ],
     "flatpak": [],
     "cargo": [
-"alacritty",
-"bat",
-"bottom",
-"du-dust",
-"eza",
-"# starship",
-"zellij",
-"zoxide"
-],
+      "alacritty",
+      "bat",
+      "bottom",
+      "du-dust",
+      "eza",
+      "# starship",
+      "zellij",
+      "zoxide"
+    ],
     "deb": [
       {
         "name": "Obsidian",
@@ -112,9 +114,9 @@
   "update": {
     "check": false,
     "aptFull": true,
-    "flatpak": false,
-    "pip": false,
-    "cargo": false
+    "flatpak": true,
+    "pip": true,
+    "cargo": true
   },
   "configure": {
     "check": true,

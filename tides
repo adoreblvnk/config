@@ -24,7 +24,7 @@ Commands:
 Configuration:
   Customise each command's behaviour by modifying the \`config.json\` file.
   Optionally, packages to be installed can be managed via \`deps.list\` & \`install.list\` text file.
-  The config schema of $(config.json) is available at \`README.md\`.
+  The config schema of \`config.json\` is available at \`README.md\`.
 
 Example:
   tides configure
@@ -92,21 +92,13 @@ main() {
 
   while [[ $# -gt 0 ]]; do
     case $1 in
-      check)
-        check
-        ;;
-      install | i)
-        install
-        ;;
-      update | u)
-        update
-        ;;
-      configure | c)
-        configure
-        ;;
+      check) check ;;
+      install | i) install ;;
+      update | u) update ;;
+      configure | c) configure ;;
       help | h)
         usage
-        exit 0
+        # exit 0
         ;;
       *)
         usage

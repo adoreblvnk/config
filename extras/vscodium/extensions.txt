@@ -1,5 +1,6 @@
 adpyke.codesnap
 catppuccin.catppuccin-vsc
+catppuccin.catppuccin-vsc-icons
 christian-kohler.path-intellisense
 eamodio.gitlens
 ecmel.vscode-html-css
