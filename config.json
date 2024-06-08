@@ -121,12 +121,12 @@
   },
   "configure": {
     "check": true,
-    "dotfiles": {
-      "alacritty": false,
-      "bash": false,
-      "codium": false,
-      "macchina": true,
-      "zellij": false
-    }
+    "dotfiles": [
+      "alacritty",
+      "bash",
+      "codium",
+      "macchina",
+      "zellij"
+    ]
   }
 }

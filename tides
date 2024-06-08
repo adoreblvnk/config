@@ -89,7 +89,21 @@ configure() {
     check
   fi
 
-  echo configure
+  # dotfile manager implementation via Stow
+  if [[ $(jq '.configure.dotfiles | map(select(startswith("#") | not)) | length' "$config") > 0 ]] \
+    && command -v stow &>/dev/null; then
+    declare -a packages=($(jq -r '.configure.dotfiles | map(select(startswith("#") | not)) | .[]' "$config"))
+    for package in "${packages[@]}"; do
+      stow --no-folding --adopt -vv -d "dotfiles/" -t $HOME $package
+      # override system files with tides' dotfiles
+      # NOTE: commit any new changes made to dotfiles as they will be reset if there are any changes detected
+      # TODO: explore a cleaner option than git restore
+      if [[ $(git status --porcelain --untracked-files=no | grep $package) ]]; then
+        # git restore "dotfiles/$package/"
+        echo hi
+      fi
+    done
+  fi
 }
 
 main() {

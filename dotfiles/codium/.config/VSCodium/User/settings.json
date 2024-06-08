@@ -35,6 +35,7 @@
     "typescript.suggest.completeFunctionCalls": true,
     "window.menuBarVisibility": "toggle",
     "workbench.colorTheme": "Catppuccin Frappé",
+    "workbench.iconTheme": "catppuccin-frappe",
     "workbench.settings.enableNaturalLanguageSearch": false,
     "workbench.startupEditor": "none",
     "zenMode.centerLayout": false,
