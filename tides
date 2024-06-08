@@ -53,18 +53,18 @@ update() {
   sudo apt-get -qy upgrade
 
   # aptFull removes old archive files & unused packages with their config files
-  if $(jq '.update.aptFull' "$config"); then
+  if [[ $(jq '.update.aptFull' "$config") == true ]]; then
     sudo apt-get -qy autoclean
     sudo apt-get -qy --purge autoremove
   fi
 
   # update flatpak
-  if $(jq '.update.flatpak' "$config") && command -v flatpak &>/dev/null; then
+  if [[ $(jq '.update.flatpak' "$config") == true ]] && command -v flatpak &>/dev/null; then
     flatpak update -y
   fi
 
   # update pip
-  if $(jq '.update.pip' "$config") && command -v pyenv &>/dev/null; then
+  if [[ $(jq '.update.pip' "$config") == true ]] && command -v pyenv &>/dev/null; then
     # TODO: test if pyenv update updates python patch version too
     pyenv update
     local version=$(jq '.check.python.version' "$config")
@@ -72,25 +72,34 @@ update() {
   fi
 
   # update cargo
-  if $(jq '.update.cargo' "$config") && command -v rustup &>/dev/null; then
+  if [[ $(jq '.update.cargo' "$config") == true ]] && command -v rustup &>/dev/null; then
     # update rust first
     rustup update
     cargo install-update -a
   fi
+
+  # zellij delete all other sessions, including exited ones
+  if [[ $(jq '.update.zellijClear' "$config") == true ]] && command -v zellij &>/dev/null; then
+    zellij delete-all-sessions -y
+  fi
 }
 
 configure() {
+  if [[ $(jq '.configure.check' "$config") == true ]]; then
+    check
+  fi
+
   echo configure
 }
 
 main() {
-  [[ $# -gt 0 ]] || {
+  [[ $# > 0 ]] || {
     usage
     error_msg
     exit 1
   }
 
-  while [[ $# -gt 0 ]]; do
+  while [[ $# > 0 ]]; do
     case $1 in
       check) check ;;
       install | i) install ;;

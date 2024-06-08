@@ -113,18 +113,20 @@
   },
   "update": {
     "check": false,
-    "aptFull": true,
-    "flatpak": true,
-    "pip": true,
-    "cargo": true
+    "aptFull": false,
+    "flatpak": false,
+    "pip": false,
+    "cargo": false,
+    "zellijClear": true
   },
   "configure": {
     "check": true,
     "dotfiles": {
-      "bash": true,
-      "alacritty": true,
-      "zellij": true,
-      "codium": true
+      "alacritty": false,
+      "bash": false,
+      "codium": false,
+      "macchina": true,
+      "zellij": false
     }
   }
 }
