@@ -123,6 +123,7 @@
     "check": true,
     "dotfiles": [
       "alacritty",
+      "autostart",
       "bash",
       "codium",
       "macchina",
