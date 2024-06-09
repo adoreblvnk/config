@@ -3,7 +3,7 @@ alias c=clear
 alias py=python
 alias pip="python -m pip"
 
-alias cat="batcat -pp"
+alias cat="bat -pp"
 
 # eza aliases
 alias ls="eza --group-directories-first"
