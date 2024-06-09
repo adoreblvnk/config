@@ -13,5 +13,6 @@ ms-python.isort
 ms-python.python
 redhat.vscode-yaml
 streetsidesoftware.code-spell-checker
+timonwong.shellcheck
 wayou.vscode-todo-highlight
 yzhang.markdown-all-in-one
