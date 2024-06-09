@@ -6,7 +6,7 @@ set -euo pipefail
 # constants
 config="config.json"
 # deps_file="deps.list"
-install_file="install.list"
+# install_file="install.list"
 filter_comment='map(select(startswith("#") | not))'
 
 usage() {
@@ -46,12 +46,17 @@ check() {
 
 install() {
 
-  if [[ -n $(command -v cargo) ]]; then
-
-    echo install
-  fi
-  if command -v cargo; then
-    echo unsafe
+  if [[ $(jq ".install.cargo | $filter_comment | length" "$config") -gt 0 ]] \
+    && command -v cargo &>/dev/null; then
+    local rust_pkgs
+    mapfile -t rust_pkgs < <(
+      jq -rc ".install.cargo | $filter_comment | .[]" "$config"
+    )
+    for pkg in "${rust_pkgs[@]}"; do
+      # don't enclose in quotes (eg for `--locked` option)
+      # shellcheck disable=SC2086
+      cargo install $pkg
+    done
   fi
 }
 
@@ -68,13 +73,13 @@ update() {
 
   # update flatpak
   if [[ $(jq '.update.flatpak' "$config") == true ]] \
-    && [[ -n $(command -v flatpak) ]]; then
+    && command -v flatpak &>/dev/null; then
     flatpak update -y
   fi
 
   # update pip
   if [[ $(jq '.update.pip' "$config") == true ]] \
-    && [[ -n $(command -v pyenv) ]]; then
+    && command -v pyenv &>/dev/null; then
     # TODO: test if pyenv update updates python patch version too
     pyenv update
     local version
@@ -84,7 +89,7 @@ update() {
 
   # update cargo
   if [[ $(jq '.update.cargo' "$config") == true ]] \
-    && [[ -n $(command -v rustup) ]]; then
+    && command -v rustup &>/dev/null; then
     # update rust first
     rustup update
     cargo install-update -a
@@ -92,7 +97,7 @@ update() {
 
   # zellij delete all other sessions, including exited ones
   if [[ $(jq '.update.zellijClear' "$config") == true ]] \
-    && [[ -n $(command -v zellij) ]]; then
+    && command -v zellij &>/dev/null; then
     zellij delete-all-sessions -y
   fi
 }
@@ -104,7 +109,7 @@ configure() {
 
   # dotfile manager implementation via Stow
   if [[ $(jq ".configure.dotfiles | $filter_comment | length" "$config") -gt 0 ]] \
-    && [[ -n $(command -v stow) ]]; then
+    && command -v stow &>/dev/null; then
     local packages
     mapfile -t packages < <(
       jq -r ".configure.dotfiles | $filter_comment | .[]" "$config"

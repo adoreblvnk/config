@@ -55,7 +55,6 @@
   "install": {
     "check": true,
     "apt": [
-      "bat",
       "btop",
       "fzf",
       "gnupg2",
@@ -107,13 +106,13 @@
     ],
     "cargo": [
       "alacritty",
-      "bat",
-      "bottom",
+      "bat --locked",
+      "bottom --locked",
       "du-dust",
       "eza",
-      "# starship",
-      "zellij",
-      "zoxide"
+      "starship --locked",
+      "zellij --locked",
+      "zoxide --locked"
     ],
     "appImage": [
       {
@@ -132,7 +131,7 @@
   },
   "configure": {
     "check": true,
-    "stowMode": "override",
+    "stowMode": "restore",
     "dotfiles": [
       "alacritty",
       "# autostart",
