@@ -5,8 +5,9 @@ set -euo pipefail
 
 # constants
 config="config.json"
-deps_file="deps.list"
+# deps_file="deps.list"
 install_file="install.list"
+filter_comment='map(select(startswith("#") | not))'
 
 usage() {
   cat <<EOF
@@ -44,7 +45,14 @@ check() {
 }
 
 install() {
-  echo install
+
+  if [[ -n $(command -v cargo) ]]; then
+
+    echo install
+  fi
+  if command -v cargo; then
+    echo unsafe
+  fi
 }
 
 update() {
@@ -59,27 +67,32 @@ update() {
   fi
 
   # update flatpak
-  if [[ $(jq '.update.flatpak' "$config") == true ]] && command -v flatpak &>/dev/null; then
+  if [[ $(jq '.update.flatpak' "$config") == true ]] \
+    && [[ -n $(command -v flatpak) ]]; then
     flatpak update -y
   fi
 
   # update pip
-  if [[ $(jq '.update.pip' "$config") == true ]] && command -v pyenv &>/dev/null; then
+  if [[ $(jq '.update.pip' "$config") == true ]] \
+    && [[ -n $(command -v pyenv) ]]; then
     # TODO: test if pyenv update updates python patch version too
     pyenv update
-    local version=$(jq '.check.python.version' "$config")
-    python$version -m pip install --upgrade pip
+    local version
+    version=$(jq '.check.python.version' "$config")
+    python"$version" -m pip install --upgrade pip
   fi
 
   # update cargo
-  if [[ $(jq '.update.cargo' "$config") == true ]] && command -v rustup &>/dev/null; then
+  if [[ $(jq '.update.cargo' "$config") == true ]] \
+    && [[ -n $(command -v rustup) ]]; then
     # update rust first
     rustup update
     cargo install-update -a
   fi
 
   # zellij delete all other sessions, including exited ones
-  if [[ $(jq '.update.zellijClear' "$config") == true ]] && command -v zellij &>/dev/null; then
+  if [[ $(jq '.update.zellijClear' "$config") == true ]] \
+    && [[ -n $(command -v zellij) ]]; then
     zellij delete-all-sessions -y
   fi
 }
@@ -90,30 +103,34 @@ configure() {
   fi
 
   # dotfile manager implementation via Stow
-  if [[ $(jq '.configure.dotfiles | map(select(startswith("#") | not)) | length' "$config") > 0 ]] \
-    && command -v stow &>/dev/null; then
-    declare -a packages=($(jq -r '.configure.dotfiles | map(select(startswith("#") | not)) | .[]' "$config"))
+  if [[ $(jq ".configure.dotfiles | $filter_comment | length" "$config") -gt 0 ]] \
+    && [[ -n $(command -v stow) ]]; then
+    local packages
+    mapfile -t packages < <(
+      jq -r ".configure.dotfiles | $filter_comment | .[]" "$config"
+    )
     for package in "${packages[@]}"; do
-      stow --no-folding --adopt -vv -d "dotfiles/" -t $HOME $package
+      # symlink between tides & actual dotfiles
+      stow --no-folding --adopt -v -d "dotfiles/" -t $HOME "$package"
       # override system files with tides' dotfiles
       # NOTE: commit any new changes made to dotfiles as they will be reset if there are any changes detected
       # TODO: explore a cleaner option than git restore
-      if [[ $(git status --porcelain --untracked-files=no | grep $package) ]]; then
-        # git restore "dotfiles/$package/"
-        echo hi
+      if [[ $(jq -r '.configure.stowMode' "$config") == "override" ]] \
+        && git status --porcelain --untracked-files=no | grep -q "$package"; then
+        git restore "dotfiles/$package/"
       fi
     done
   fi
 }
 
 main() {
-  [[ $# > 0 ]] || {
+  [[ $# -gt 0 ]] || {
     usage
     error_msg
     exit 1
   }
 
-  while [[ $# > 0 ]]; do
+  while [[ $# -gt 0 ]]; do
     case $1 in
       check) check ;;
       install | i) install ;;

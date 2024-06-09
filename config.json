@@ -5,6 +5,7 @@
       "apt-transport-https",
       "bash-completion",
       "build-essential",
+      "ca-certificates",
       "cmake",
       "curl",
       "ffmpeg",
@@ -49,7 +50,7 @@
       "rustupCheck": true,
       "cargoUpdateCheck": true
     },
-    "firmware": ""
+    "firmware": {}
   },
   "install": {
     "check": true,
@@ -68,9 +69,12 @@
     ],
     "ppa": [
       {
-        "name": "qbittorrent",
         "ppa": "ppa:qbittorrent-team/qbittorrent-stable",
         "packages": ["qbittorrent"]
+      },
+      {
+        "name": "ppa:obsproject/obs-studio",
+        "packages": ["obs-studio"]
       }
     ],
     "aptAltSources": [
@@ -93,7 +97,14 @@
         "packages": ["codium"]
       }
     ],
-    "flatpak": [],
+    "flatpak": [
+      "com.discordapp.Discord",
+      "com.obsproject.Studio",
+      "md.obsidian.Obsidian",
+      "org.gimp.GIMP",
+      "org.libreoffice.LibreOffice",
+      "org.telegram.desktop"
+    ],
     "cargo": [
       "alacritty",
       "bat",
@@ -104,10 +115,10 @@
       "zellij",
       "zoxide"
     ],
-    "deb": [
+    "appImage": [
       {
-        "name": "Obsidian",
-        "url": "https://github.com/obsidianmd/obsidian-releases/releases/latest/download/obsidian_$(curl -sL https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest | jq -r '.name')_amd64.deb"
+        "name": "Bitwarden",
+        "url": "https://vault.bitwarden.com/download/?app=desktop&platform=linux&variant=appimage"
       }
     ]
   },
@@ -121,13 +132,17 @@
   },
   "configure": {
     "check": true,
+    "stowMode": "override",
     "dotfiles": [
       "alacritty",
-      "autostart",
+      "# autostart",
       "bash",
       "codium",
       "macchina",
       "zellij"
-    ]
+    ],
+    "theming": {
+      "cinnamon": {}
+    }
   }
 }
