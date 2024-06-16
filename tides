@@ -4,10 +4,10 @@
 set -euo pipefail
 
 # constants
-config="config.json"
+readonly CONFIG="config.json"
 # deps_file="deps.list"
 # install_file="install.list"
-filter_comment='map(select(startswith("#") | not))'
+readonly FILTER_COMMENT='map(select(startswith("#") | not))'
 
 usage() {
   cat <<EOF
@@ -45,15 +45,41 @@ check() {
 }
 
 install() {
-
-  if [[ $(jq ".install.cargo | $filter_comment | length" "$config") -gt 0 ]] \
+  # install from apt alternative sources
+  if [[ $(jq '.install.aptAltSources | length' "$CONFIG") -gt 0 ]]; then
+    for ((i = 0; i < $(jq '.install.aptAltSources | length' $CONFIG); i++)); do
+      local alt_pkg_obj
+      alt_pkg_obj=$(jq ".install.aptAltSources | .[$i]" $CONFIG)
+      # test for gpg key's existence
+      if [[ ! -f "$(jq -r '.gpgKeyPath' <<<"$alt_pkg_obj")" ]]; then
+        # download gpg key from remote
+        sudo curl -fsSL -o "$(jq -r '.gpgKeyPath' <<<"$alt_pkg_obj")" \
+          "$(jq -r '.remoteGpgKey' <<<"$alt_pkg_obj")"
+        # add repo entry into sources.list.d
+        eval echo "$(jq -r '.repo' <<<"$alt_pkg_obj")" \
+          | sudo tee "/etc/apt/sources.list.d/$(jq -r '.sourceFile' <<<"$alt_pkg_obj").list" >/dev/null
+      fi
+      if [[ $(jq '.pinning' <<<"$alt_pkg_obj") != false ]]; then
+        # perform pinning to prioritise
+        jq -r '.pinning' <<<"$alt_pkg_obj" \
+          | sudo tee "/etc/apt/preferences.d/$(jq -r '.sourceFile' <<<$alt_pkg_obj)" >/dev/null
+      fi
+      # install packages
+      sudo apt-get update
+      # disable to enable installing multiple packages
+      # shellcheck disable=SC2046
+      sudo apt-get install -qy $(jq -r '.packages | join(" ")' <<<"$alt_pkg_obj")
+    done
+  fi
+  # install cargo packages
+  if [[ $(jq ".install.cargo | $FILTER_COMMENT | length" "$CONFIG") -gt 0 ]] \
     && command -v cargo &>/dev/null; then
     local rust_pkgs
     mapfile -t rust_pkgs < <(
-      jq -rc ".install.cargo | $filter_comment | .[]" "$config"
+      jq -rc ".install.cargo | $FILTER_COMMENT | .[]" "$CONFIG"
     )
     for pkg in "${rust_pkgs[@]}"; do
-      # don't enclose in quotes (eg for `--locked` option)
+      # disable to enable installing with options
       # shellcheck disable=SC2086
       cargo install $pkg
     done
@@ -66,29 +92,29 @@ update() {
   sudo apt-get -qy upgrade
 
   # aptFull removes old archive files & unused packages with their config files
-  if [[ $(jq '.update.aptFull' "$config") == true ]]; then
+  if [[ $(jq '.update.aptFull' "$CONFIG") == true ]]; then
     sudo apt-get -qy autoclean
     sudo apt-get -qy --purge autoremove
   fi
 
   # update flatpak
-  if [[ $(jq '.update.flatpak' "$config") == true ]] \
+  if [[ $(jq '.update.flatpak' "$CONFIG") == true ]] \
     && command -v flatpak &>/dev/null; then
     flatpak update -y
   fi
 
   # update pip
-  if [[ $(jq '.update.pip' "$config") == true ]] \
+  if [[ $(jq '.update.pip' "$CONFIG") == true ]] \
     && command -v pyenv &>/dev/null; then
     # TODO: test if pyenv update updates python patch version too
     pyenv update
     local version
-    version=$(jq '.check.python.version' "$config")
+    version=$(jq '.check.python.version' "$CONFIG")
     python"$version" -m pip install --upgrade pip
   fi
 
   # update cargo
-  if [[ $(jq '.update.cargo' "$config") == true ]] \
+  if [[ $(jq '.update.cargo' "$CONFIG") == true ]] \
     && command -v rustup &>/dev/null; then
     # update rust first
     rustup update
@@ -96,23 +122,23 @@ update() {
   fi
 
   # zellij delete all other sessions, including exited ones
-  if [[ $(jq '.update.zellijClear' "$config") == true ]] \
+  if [[ $(jq '.update.zellijClear' "$CONFIG") == true ]] \
     && command -v zellij &>/dev/null; then
     zellij delete-all-sessions -y
   fi
 }
 
 configure() {
-  if [[ $(jq '.configure.check' "$config") == true ]]; then
+  if [[ $(jq '.configure.check' "$CONFIG") == true ]]; then
     check
   fi
 
   # dotfile manager implementation via Stow
-  if [[ $(jq ".configure.dotfiles | $filter_comment | length" "$config") -gt 0 ]] \
+  if [[ $(jq ".configure.dotfiles | $FILTER_COMMENT | length" "$CONFIG") -gt 0 ]] \
     && command -v stow &>/dev/null; then
     local packages
     mapfile -t packages < <(
-      jq -r ".configure.dotfiles | $filter_comment | .[]" "$config"
+      jq -r ".configure.dotfiles | $FILTER_COMMENT | .[]" "$CONFIG"
     )
     for package in "${packages[@]}"; do
       # symlink between tides & actual dotfiles
@@ -120,7 +146,7 @@ configure() {
       # override system files with tides' dotfiles
       # NOTE: commit any new changes made to dotfiles as they will be reset if there are any changes detected
       # TODO: explore a cleaner option than git restore
-      if [[ $(jq -r '.configure.stowMode' "$config") == "override" ]] \
+      if [[ $(jq -r '.configure.stowMode' "$CONFIG") == "override" ]] \
         && git status --porcelain --untracked-files=no | grep -q "$package"; then
         git restore "dotfiles/$package/"
       fi

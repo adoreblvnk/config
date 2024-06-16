@@ -56,7 +56,7 @@
     }
   },
   "install": {
-    "check": true,
+    "check": false,
     "apt": [
       "# CLI utils",
       "fzf",
@@ -88,12 +88,12 @@
         "repo": "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main",
         "sourceFile": "mozilla",
         "pinning": "Package: *\nPin: origin packages.mozilla.org\nPin-Priority: 1000",
-        "packages": []
+        "packages": ["firefox"]
       },
       {
         "remoteGpgKey": "https://download.docker.com/linux/ubuntu/gpg",
         "gpgKeyPath": "/etc/apt/keyrings/docker.asc",
-        "repo": "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo '$VERSION_CODENAME') stable",
+        "repo": "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) stable",
         "sourceFile": "docker",
         "pinning": false,
         "packages": [
@@ -114,8 +114,8 @@
       },
       {
         "remoteGpgKey": "https://www.virtualbox.org/download/oracle_vbox_2016.asc",
-        "gpgKeyPath": "/usr/share/keyrings/oracle-virtualbox-2016.gpg",
-        "repo": "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian <mydist> contrib",
+        "gpgKeyPath": "/usr/share/keyrings/oracle-virtualbox-2016.asc",
+        "repo": "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/oracle-virtualbox-2016.asc] https://download.virtualbox.org/virtualbox/debian $(. /etc/os-release && echo $UBUNTU_CODENAME) contrib",
         "sourceFile": "virtualbox",
         "pinning": false,
         "packages": ["virtualbox-7.0"]
@@ -149,10 +149,10 @@
   },
   "update": {
     "check": false,
-    "aptFull": false,
-    "flatpak": false,
-    "pip": false,
-    "cargo": false,
+    "aptFull": true,
+    "flatpak": true,
+    "pip": true,
+    "cargo": true,
     "zellijClear": true
   },
   "configure": {
