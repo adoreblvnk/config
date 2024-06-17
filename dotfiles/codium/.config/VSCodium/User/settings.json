@@ -32,6 +32,9 @@
     "shellformat.flag": "-i 2 -ci -bn",
     "telemetry.telemetryLevel": "off",
     "terminal.integrated.fontSize": 16,
+    "todohighlight.keywords": [
+        "NOTE:"
+    ],
     "typescript.suggest.completeFunctionCalls": true,
     "window.menuBarVisibility": "toggle",
     "workbench.colorTheme": "Catppuccin Frappé",
