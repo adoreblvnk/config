@@ -45,6 +45,55 @@ check() {
   echo check
 }
 
+install() {
+  if [[ $(yq '.config.configure.check' $CONFIG) == true ]]; then
+    check
+  fi
+
+  # install from apt alternative sources
+  local no_of_alt_sources=$(yq '.config.install.aptAltSources | length' $CONFIG)
+  if [[ $no_of_alt_sources -gt 0 ]]; then
+    # setting up signing keys & repo entries
+    for ((i = 0; i < no_of_alt_sources; i++)); do
+      local alt_pkg_obj=$(yq ".config.install.aptAltSources[$i]" $CONFIG)
+      # download gpg key from remote
+      sudo curl -fsSL -o "$(yq '.gpgKeyPath' <<<"$alt_pkg_obj")" \
+        "$(yq '.remoteGpgKey' <<<"$alt_pkg_obj")"
+      # add repo entry into sources.list.d
+      local source_file_full_path="/etc/apt/sources.list.d/$(yq '.sourceFile' <<<"$alt_pkg_obj").list"
+      eval echo "$(yq '.repo' <<<"$alt_pkg_obj")"
+      eval echo "$(yq '.repo' <<<"$alt_pkg_obj")" \
+        | sudo tee "$source_file_full_path" >/dev/null
+      if [[ $(yq '.pinning' <<<"$alt_pkg_obj") != false ]]; then
+        # perform pinning to prioritise
+        local pref_file="/etc/apt/preferences.d/$(yq '.sourceFile' <<<$alt_pkg_obj)"
+        yq '.pinning' <<<"$alt_pkg_obj" \
+          | sudo tee "$pref_file" >/dev/null
+        echo "performing pinning for $(yq -r '.sourceFile' <<<"$alt_pkg_obj")"
+      fi
+      # install packages
+      sudo apt-get update -q
+      # disable to enable installing multiple packages
+      # shellcheck disable=SC2046
+      sudo apt-get install -qy $(yq '.packages | join(" ")' <<<"$alt_pkg_obj")
+    done
+  fi
+
+  # # install cargo packages
+  # if [[ $(yq ".install.cargo | $FILTER_COMMENT | length" "$CONFIG") -gt 0 ]] \
+  #   && command -v cargo &>/dev/null; then
+  #   local rust_pkgs
+  #   mapfile -t rust_pkgs < <(
+  #     yqc ".install.cargo | $FILTER_COMMENT | .[]" "$CONFIG"
+  #   )
+  #   for pkg in "${rust_pkgs[@]}"; do
+  #     # disable to enable installing with options
+  #     # shellcheck disable=SC2086
+  #     cargo install $pkg
+  #   done
+  # fi
+}
+
 update() {
   if [[ $(yq '.config.update.check' $CONFIG) == true ]]; then
     check
@@ -133,7 +182,8 @@ configure() {
       if [[ $(yq -r '.config.configure.stowMode' $CONFIG) == "override" ]] \
         && git status --porcelain --untracked-files=no $DOTFILES \
         | grep -q "$package"; then
-        # NOTE: commit any new changes made to dotfiles as they will be reset if there are any changes detected
+        # NOTE: commit any new changes made to dotfiles as they will be reset
+        # if there are any changes detected.
         # TODO: explore a cleaner option than git restore
         git restore "$DOTFILES/$package/"
       fi
