@@ -138,7 +138,7 @@ config:
     check: true
     apt:
       apt: false
-      aptFull: true # apt must be true
+      aptFull: true # NOTE: apt must be true for aptFull to take effect
     flatpak: false
     pip: false
     cargo: false
@@ -147,7 +147,7 @@ config:
       zellijClear: true
   configure:
     check: true
-    stowMode: restore # backup
+    stowMode: backup # override | backup
     dotfiles:
       - alacritty
       # - autostart

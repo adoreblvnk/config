@@ -4,6 +4,7 @@
 set -euo pipefail
 
 # constants
+readonly DOTFILES="dotfiles/"
 readonly CONFIG="config.yaml"
 # deps_file="deps.list"
 # install_file="install.list"
@@ -105,6 +106,38 @@ update() {
   if [[ $(yq '.config.update.other.zellijClear' "$CONFIG") == true ]] \
     && command -v zellij &>/dev/null; then
     zellij delete-all-sessions -y
+  fi
+}
+
+configure() {
+  if [[ $(yq '.config.configure.check' $CONFIG) == true ]]; then
+    check
+  fi
+
+  # dotfile manager implementation via Stow
+  if [[ $(yq '.config.configure.dotfiles | length' $CONFIG) -gt 0 ]] \
+    && command -v stow &>/dev/null; then
+    local packages
+    mapfile -t packages < <(
+      yq -r '.config.configure.dotfiles[]' $CONFIG
+    )
+    echo "${packages[@]}"
+    for package in "${packages[@]}"; do
+      # symlink between tides & actual dotfiles
+      # --no-folding stows individual files instead of directories
+      # --adopt replaces tides' dotfiles with system ones. this is needed as
+      # Stow throws an error if there are existing system dotfiles. mitigated
+      # if .config.configure.stowMode is set to "override".
+      stow --no-folding --adopt -v -d "dotfiles/" -t "$HOME" "$package"
+      # override system files with tides' dotfiles
+      if [[ $(yq -r '.config.configure.stowMode' $CONFIG) == "override" ]] \
+        && git status --porcelain --untracked-files=no $DOTFILES \
+        | grep -q "$package"; then
+        # NOTE: commit any new changes made to dotfiles as they will be reset if there are any changes detected
+        # TODO: explore a cleaner option than git restore
+        git restore "$DOTFILES/$package/"
+      fi
+    done
   fi
 }
 
