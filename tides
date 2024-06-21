@@ -57,11 +57,16 @@ install() {
     for ((i = 0; i < no_of_alt_sources; i++)); do
       local alt_pkg_obj=$(yq ".config.install.aptAltSources[$i]" $CONFIG)
       # download gpg key from remote
-      sudo curl -fsSL -o "$(yq '.gpgKeyPath' <<<"$alt_pkg_obj")" \
-        "$(yq '.remoteGpgKey' <<<"$alt_pkg_obj")"
+      if [[ $(yq '.gpgKeyPath' <<<"$alt_pkg_obj") == *.asc ]]; then
+        sudo curl -fsSL -o "$(yq '.gpgKeyPath' <<<"$alt_pkg_obj")" \
+          "$(yq '.remoteGpgKey' <<<"$alt_pkg_obj")"
+      elif [[ $(yq '.gpgKeyPath' <<<"$alt_pkg_obj") == *.gpg ]]; then
+        # dearmor if key is required to be in gpg format
+        sudo curl -fsSL "$(yq '.remoteGpgKey' <<<"$alt_pkg_obj")" \
+          | sudo gpg --dearmor --yes -o "$(yq '.gpgKeyPath' <<<"$alt_pkg_obj")"
+      fi
       # add repo entry into sources.list.d
       local source_file_full_path="/etc/apt/sources.list.d/$(yq '.sourceFile' <<<"$alt_pkg_obj").list"
-      eval echo "$(yq '.repo' <<<"$alt_pkg_obj")"
       eval echo "$(yq '.repo' <<<"$alt_pkg_obj")" \
         | sudo tee "$source_file_full_path" >/dev/null
       if [[ $(yq '.pinning' <<<"$alt_pkg_obj") != false ]]; then
@@ -71,12 +76,12 @@ install() {
           | sudo tee "$pref_file" >/dev/null
         echo "performing pinning for $(yq -r '.sourceFile' <<<"$alt_pkg_obj")"
       fi
-      # install packages
-      sudo apt-get update -q
-      # disable to enable installing multiple packages
-      # shellcheck disable=SC2046
-      sudo apt-get install -qy $(yq '.packages | join(" ")' <<<"$alt_pkg_obj")
     done
+    # install packages
+    sudo apt-get update -qy
+    # disable shellcheck to enable installing multiple packages
+    # shellcheck disable=SC2046
+    sudo apt-get install -qy $(yq '.config.install.aptAltSources[].packages[]' $CONFIG)
   fi
 
   # # install cargo packages
