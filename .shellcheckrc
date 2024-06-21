@@ -1,1 +1,2 @@
+# Declare and assign separately to avoid masking return values.
 disable=SC2155
