@@ -200,7 +200,7 @@ update() {
       curl -s https://api.github.com/repos/mikefarah/yq/releases/latest \
         | yq -o=json -r '.tag_name'
     )
-    if [[ $local_yq_ver == "$latest_yq_ver" ]]; then
+    if [[ $local_yq_ver != "$latest_yq_ver" ]]; then
       # download & install yq
       sudo curl -sSL -o /usr/bin/yq \
         https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
