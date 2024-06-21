@@ -270,7 +270,6 @@ main() {
       configure | c) configure ;;
       help | h)
         usage
-        # exit 0
         ;;
       *)
         usage
