@@ -50,12 +50,33 @@ install() {
     check
   fi
 
+  # install apt packages
+  if [[ $(yq '.config.install.apt | length' $CONFIG) -gt 0 ]]; then
+    sudo apt-get update -qqy
+    # shellcheck disable=SC2046
+    sudo apt-get install -qy $(yq '.config.install.apt[]' $CONFIG)
+  fi
+
+  # install ppa packages
+  local no_of_ppa_pkgs=$(yq '.config.install.ppa | length' $CONFIG)
+  if [[ $no_of_ppa_pkgs -gt 0 ]]; then
+    # add ppa repos (& their gpg keys automatically)
+    for ((i = 0; i < no_of_ppa_pkgs; i++)); do
+      sudo apt-add-repository -y \
+        "$(yq ".config.install.ppa[$i].ppaUrl" $CONFIG)"
+    done
+    sudo apt-get update -q
+    # shellcheck disable=SC2046
+    sudo apt-get install -qy $(yq '.config.install.ppa[].packages[]' $CONFIG)
+  fi
+
   # install from apt alternative sources
   local no_of_alt_sources=$(yq '.config.install.aptAltSources | length' $CONFIG)
   if [[ $no_of_alt_sources -gt 0 ]]; then
     # setting up signing keys & repo entries
     for ((i = 0; i < no_of_alt_sources; i++)); do
       local alt_pkg_obj=$(yq ".config.install.aptAltSources[$i]" $CONFIG)
+
       # download gpg key from remote
       if [[ $(yq '.gpgKeyPath' <<<"$alt_pkg_obj") == *.asc ]]; then
         sudo curl -fsSL -o "$(yq '.gpgKeyPath' <<<"$alt_pkg_obj")" \
@@ -65,38 +86,70 @@ install() {
         sudo curl -fsSL "$(yq '.remoteGpgKey' <<<"$alt_pkg_obj")" \
           | sudo gpg --dearmor --yes -o "$(yq '.gpgKeyPath' <<<"$alt_pkg_obj")"
       fi
+
       # add repo entry into sources.list.d
       local source_file_full_path="/etc/apt/sources.list.d/$(yq '.sourceFile' <<<"$alt_pkg_obj").list"
       eval echo "$(yq '.repo' <<<"$alt_pkg_obj")" \
         | sudo tee "$source_file_full_path" >/dev/null
+
+      # perform pinning if pinning entry exists
       if [[ $(yq '.pinning' <<<"$alt_pkg_obj") != false ]]; then
         # perform pinning to prioritise
         local pref_file="/etc/apt/preferences.d/$(yq '.sourceFile' <<<$alt_pkg_obj)"
         yq '.pinning' <<<"$alt_pkg_obj" \
           | sudo tee "$pref_file" >/dev/null
-        echo "performing pinning for $(yq -r '.sourceFile' <<<"$alt_pkg_obj")"
       fi
     done
     # install packages
-    sudo apt-get update -qy
+    sudo apt-get update -q
     # disable shellcheck to enable installing multiple packages
     # shellcheck disable=SC2046
-    sudo apt-get install -qy $(yq '.config.install.aptAltSources[].packages[]' $CONFIG)
+    sudo apt-get install -qy \
+      $(yq '.config.install.aptAltSources[].packages[]' $CONFIG)
   fi
 
-  # # install cargo packages
-  # if [[ $(yq ".install.cargo | $FILTER_COMMENT | length" "$CONFIG") -gt 0 ]] \
-  #   && command -v cargo &>/dev/null; then
-  #   local rust_pkgs
-  #   mapfile -t rust_pkgs < <(
-  #     yqc ".install.cargo | $FILTER_COMMENT | .[]" "$CONFIG"
-  #   )
-  #   for pkg in "${rust_pkgs[@]}"; do
-  #     # disable to enable installing with options
-  #     # shellcheck disable=SC2086
-  #     cargo install $pkg
-  #   done
-  # fi
+  # install flatpaks
+  if [[ $(yq '.config.install.flatpak | length' $CONFIG) -gt 0 ]] \
+    && command -v flatpak &>/dev/null; then
+    # shellcheck disable=SC2046
+    flatpak install -y flathub $(yq '.config.install.flatpak[]' $CONFIG)
+  fi
+
+  # install pip cli packages
+  if [[ $(yq '.config.install.pip | length' $CONFIG) -gt 0 ]] \
+    && command -v pyenv &>/dev/null; then
+    local py_ver=$(yq '.config.check.python.version' "$CONFIG")
+    # shellcheck disable=SC2046
+    $py_ver -m pip install $(yq '.config.install.pip[]' $CONFIG)
+  fi
+
+  # install cargo packages
+  if [[ $(yq '.config.install.cargo | length' $CONFIG) -gt 0 ]] \
+    && command -v cargo &>/dev/null; then
+    local rust_pkgs
+    mapfile -t rust_pkgs < <(
+      yq '.config.install.cargo[]' $CONFIG
+    )
+    for pkg in "${rust_pkgs[@]}"; do
+      # disable to enable installing with options
+      # shellcheck disable=SC2086
+      cargo install $pkg
+    done
+  fi
+
+  # install binary packages
+  local no_of_binaries=$(yq '.config.install.binaries | length' $CONFIG)
+  if [[ $no_of_binaries -gt 0 ]]; then
+    mkdir -p $HOME/Applications
+    for ((i = 0; i < no_of_binaries; i++)); do
+      local binary_obj=$(yq ".config.install.binaries[$i]" $CONFIG)
+      if [[ $(yq '.name' <<<"$binary_obj") == *.AppImage ]]; then
+        curl -fsSL -o "$HOME/Applications/$(yq '.name' <<<"$binary_obj")" \
+          "$(yq '.url' <<<"$binary_obj")"
+        chmod +x "$HOME/Applications/$(yq '.name' <<<"$binary_obj")"
+      fi
+    done
+  fi
 }
 
 update() {
@@ -122,17 +175,16 @@ update() {
   fi
 
   # update pip
-  if [[ $(yq '.config.update.pip' "$CONFIG") == true ]] \
+  if [[ $(yq '.config.update.pip' $CONFIG) == true ]] \
     && command -v pyenv &>/dev/null; then
     # TODO: test if pyenv update updates python patch version too
     pyenv update
-    local version
-    version=$(yq '.config.check.python.version' "$CONFIG")
-    python"$version" -m pip install --upgrade pip
+    local py_ver=$(yq '.config.check.python.version' $CONFIG)
+    $py_ver -m pip install --upgrade pip
   fi
 
   # update cargo
-  if [[ $(yq '.config.update.cargo' "$CONFIG") == true ]] \
+  if [[ $(yq '.config.update.cargo' $CONFIG) == true ]] \
     && command -v rustup &>/dev/null; then
     # update rust first
     rustup update
@@ -140,7 +192,7 @@ update() {
   fi
 
   # update yq
-  if [[ $(yq '.config.update.other.yq' "$CONFIG") ]]; then
+  if [[ $(yq '.config.update.other.yq' $CONFIG) ]]; then
     # get local yq version & parse it
     local_yq_ver=$(yq --version | cut -d ' ' -f 4)
     # get latest yq version
@@ -157,7 +209,7 @@ update() {
   fi
 
   # zellij delete all other sessions, including exited ones
-  if [[ $(yq '.config.update.other.zellijClear' "$CONFIG") == true ]] \
+  if [[ $(yq '.config.update.other.zellijClear' $CONFIG) == true ]] \
     && command -v zellij &>/dev/null; then
     zellij delete-all-sessions -y
   fi

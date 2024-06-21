@@ -48,7 +48,7 @@ config:
       - pkg-config
     python:
       pyenvCheck: true
-      version: 3.12
+      version: python3.12
     rust:
       rustupCheck: true
       cargoUpdateCheck: true
@@ -69,13 +69,12 @@ config:
       - vlc
       # productivity
     ppa:
-      - ppa: ppa:qbittorrent-team/qbittorrent-stable
+      - ppaUrl: ppa:qbittorrent-team/qbittorrent-stable
         packages:
           - qbittorrent
-      - name: ppa:obsproject/obs-studio
+      - ppaUrl: ppa:obsproject/obs-studio
         packages:
           - obs-studio
-    aptAltSourcesEnabled: false
     aptAltSources:
       - remoteGpgKey: https://packages.mozilla.org/apt/repo-signing-key.gpg
         gpgKeyPath: /etc/apt/keyrings/packages.mozilla.org.asc
@@ -114,14 +113,13 @@ config:
           - virtualbox-7.0
     flatpak:
       - com.discordapp.Discord
-      - com.obsproject.Studio
+      # - com.obsproject.Studio
       - md.obsidian.Obsidian
-      - org.gimp.GIMP
-      - org.libreoffice.LibreOffice
-      - org.telegram.desktop
+      # - org.gimp.GIMP
+      # - org.libreoffice.LibreOffice
+      # - org.telegram.desktop
     pip:
       - trash-cli
-    cargoEnabled: false
     cargo:
       - alacritty
       - bat --locked
@@ -131,8 +129,8 @@ config:
       - starship --locked
       - zellij --locked
       - zoxide --locked
-    appImage:
-      - name: Bitwarden
+    binaries:
+      - name: Bitwarden.AppImage
         url: https://vault.bitwarden.com/download/?app=desktop&platform=linux&variant=appimage
   update:
     check: true
