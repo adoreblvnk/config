@@ -53,7 +53,7 @@ config:
       rustupCheck: true
       cargoUpdateCheck: true
   install:
-    check: false
+    check: true
     aptEnabled: true
     apt:
       # CLI utils
@@ -155,7 +155,6 @@ config:
     stowMode: backup # override | backup
     dotfiles:
       - alacritty
-      # - autostart
       - bash
       - bottom
       - codium

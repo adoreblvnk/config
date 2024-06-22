@@ -1,5 +1,4 @@
 #!/bin/bash
-# /usr/bin
 
 set -euo pipefail
 
@@ -192,14 +191,17 @@ update() {
 
   # update cargo
   if [[ $(yq '.config.update.cargo' $CONFIG) == true ]] \
-    && command -v rustup &>/dev/null; then
+    && command -v rustup &>/dev/null \
+    && command -v cargo &>/dev/null; then
     # update rust first
     rustup update
+    # checks & updates to newest cargo packages
     cargo install-update -a
   fi
 
   # update yq
-  if [[ $(yq '.config.update.other.yq' $CONFIG) ]]; then
+  if [[ $(yq '.config.update.other.yq' $CONFIG) == true ]]; then
+    echo hihi
     # get local yq version & parse it
     local_yq_ver=$(yq --version | cut -d ' ' -f 4)
     # get latest yq version
