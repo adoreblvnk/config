@@ -51,7 +51,8 @@ install() {
   fi
 
   # install apt packages
-  if [[ $(yq '.config.install.apt | length' $CONFIG) -gt 0 ]]; then
+  if [[ $(yq '.config.install.aptEnabled' $CONFIG) == true ]] \
+    && [[ $(yq '.config.install.apt | length' $CONFIG) -gt 0 ]]; then
     sudo apt-get update -qqy
     # shellcheck disable=SC2046
     sudo apt-get install -qy $(yq '.config.install.apt[]' $CONFIG)
@@ -59,7 +60,8 @@ install() {
 
   # install ppa packages
   local no_of_ppa_pkgs=$(yq '.config.install.ppa | length' $CONFIG)
-  if [[ $no_of_ppa_pkgs -gt 0 ]]; then
+  if [[ $(yq '.config.install.ppaEnabled' $CONFIG) == true ]] \
+    && [[ $no_of_ppa_pkgs -gt 0 ]]; then
     # add ppa repos (& their gpg keys automatically)
     for ((i = 0; i < no_of_ppa_pkgs; i++)); do
       sudo apt-add-repository -y \
@@ -72,7 +74,8 @@ install() {
 
   # install from apt alternative sources
   local no_of_alt_sources=$(yq '.config.install.aptAltSources | length' $CONFIG)
-  if [[ $no_of_alt_sources -gt 0 ]]; then
+  if [[ $(yq '.config.install.aptAltSourcesEnabled' $CONFIG) == true ]] \
+    && [[ $no_of_alt_sources -gt 0 ]]; then
     # setting up signing keys & repo entries
     for ((i = 0; i < no_of_alt_sources; i++)); do
       local alt_pkg_obj=$(yq ".config.install.aptAltSources[$i]" $CONFIG)
@@ -109,14 +112,16 @@ install() {
   fi
 
   # install flatpaks
-  if [[ $(yq '.config.install.flatpak | length' $CONFIG) -gt 0 ]] \
+  if [[ $(yq '.config.install.flatpakEnabled' $CONFIG) == true ]] \
+    && [[ $(yq '.config.install.flatpak | length' $CONFIG) -gt 0 ]] \
     && command -v flatpak &>/dev/null; then
     # shellcheck disable=SC2046
     flatpak install -y flathub $(yq '.config.install.flatpak[]' $CONFIG)
   fi
 
   # install pip cli packages
-  if [[ $(yq '.config.install.pip | length' $CONFIG) -gt 0 ]] \
+  if [[ $(yq '.config.install.pipEnabled' $CONFIG) == true ]] \
+    && [[ $(yq '.config.install.pip | length' $CONFIG) -gt 0 ]] \
     && command -v pyenv &>/dev/null; then
     local py_ver=$(yq '.config.check.python.version' "$CONFIG")
     # shellcheck disable=SC2046
@@ -124,7 +129,8 @@ install() {
   fi
 
   # install cargo packages
-  if [[ $(yq '.config.install.cargo | length' $CONFIG) -gt 0 ]] \
+  if [[ $(yq '.config.install.cargoEnabled' $CONFIG) == true ]] \
+    && [[ $(yq '.config.install.cargo | length' $CONFIG) -gt 0 ]] \
     && command -v cargo &>/dev/null; then
     local rust_pkgs
     mapfile -t rust_pkgs < <(
@@ -139,7 +145,8 @@ install() {
 
   # install binary packages
   local no_of_binaries=$(yq '.config.install.binaries | length' $CONFIG)
-  if [[ $no_of_binaries -gt 0 ]]; then
+  if [[ $(yq '.config.install.binariesEnabled' $CONFIG) == true ]] \
+    && [[ $no_of_binaries -gt 0 ]]; then
     mkdir -p $HOME/Applications
     for ((i = 0; i < no_of_binaries; i++)); do
       local binary_obj=$(yq ".config.install.binaries[$i]" $CONFIG)
@@ -197,8 +204,8 @@ update() {
     local_yq_ver=$(yq --version | cut -d ' ' -f 4)
     # get latest yq version
     latest_yq_ver=$(
-      curl -s https://api.github.com/repos/mikefarah/yq/releases/latest \
-        | yq -o=json -r '.tag_name'
+      curl -sSL https://api.github.com/repos/mikefarah/yq/releases/latest \
+        | yq '.tag_name'
     )
     if [[ $local_yq_ver != "$latest_yq_ver" ]]; then
       # download & install yq
