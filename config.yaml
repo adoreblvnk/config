@@ -2,7 +2,9 @@ version: 0.0.1
 metadata: null
 config:
   check:
+    purgeEnabled: false
     purge: []
+    depsEnabled: false
     deps:
       # essential packages
       - apt-transport-https
@@ -15,6 +17,7 @@ config:
       - flatpak
       - git
       - software-properties-common
+      - stow
       - ttf-mscorefonts-installer
       # pyenv dependencies
       - libbz2-dev
@@ -45,13 +48,11 @@ config:
       - libfreetype6-dev
       - libxcb-xfixes0-dev
       - libxkbcommon-dev
-      - pkg-config
+      # - pkg-config # NOTE: pkgconf breaks pkg-config (>= 0.29-1)
     python:
       pyenvCheck: true
-      version: python3.12
-    rust:
-      rustupCheck: true
-      cargoUpdateCheck: true
+      version: 3.12
+    rustupCheck: true
   install:
     check: true
     aptEnabled: true
@@ -60,7 +61,6 @@ config:
       - fzf
       - gnupg2
       - openssh-server
-      - stow
       - vim
       - xclip
       # apps
@@ -145,13 +145,14 @@ config:
       apt: false
       aptFull: true # NOTE: apt must be true for aptFull to take effect
     flatpak: false
-    pip: false
+    pip: true
     cargo: false
     other:
       yq: true
       zellijClear: true
   configure:
     check: true
+    stowEnabled: true
     stowMode: backup # override | backup
     dotfiles:
       - alacritty
