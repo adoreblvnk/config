@@ -150,6 +150,7 @@ config:
       - alacritty
       # - autostart
       - bash
+      - bottom
       - codium
       - macchina
       - zellij

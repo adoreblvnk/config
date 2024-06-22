@@ -227,7 +227,6 @@ configure() {
     mapfile -t packages < <(
       yq -r '.config.configure.dotfiles[]' $CONFIG
     )
-    echo "${packages[@]}"
     for package in "${packages[@]}"; do
       # symlink between tides & actual dotfiles
       # --no-folding stows individual files instead of directories
