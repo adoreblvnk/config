@@ -309,30 +309,62 @@ configure() {
   fi
 
   # dotfile manager implementation via Stow
-  if [[ $(yq '.config.configure.stowEnabled' $CONFIG) == true ]] \
-    && [[ $(yq '.config.configure.dotfiles | length' $CONFIG) -gt 0 ]] \
+  if [[ $(yq '.config.configure.dotfilesEnabled' $CONFIG) == true ]] \
+    && [[ $(yq '.config.configure.dotfiles.dotfiles | length' $CONFIG) -gt 0 ]] \
     && command -v stow &>/dev/null; then
     local packages
     mapfile -t packages < <(
-      yq -r '.config.configure.dotfiles[]' $CONFIG
+      yq -r '.config.configure.dotfiles.dotfiles[]' $CONFIG
     )
-    for package in "${packages[@]}"; do
+    for pkg in "${packages[@]}"; do
       # symlink between tides & actual dotfiles
       # --no-folding stows individual files instead of directories
       # --adopt replaces tides' dotfiles with system ones. this is needed as
       # Stow throws an error if there are existing system dotfiles. mitigated
       # if .config.configure.stowMode is set to "override".
-      stow --no-folding --adopt -v -d "dotfiles/" -t "$HOME" "$package"
+      stow --no-folding --adopt -v -d "dotfiles/" -t "$HOME" "$pkg"
       # override system files with tides' dotfiles
-      if [[ $(yq -r '.config.configure.stowMode' $CONFIG) == "override" ]] \
+      if [[ $(yq -r '.config.configure.dotfiles.stowMode' $CONFIG) == "override" ]] \
         && git status --porcelain --untracked-files=no $DOTFILES \
-        | grep -q "$package"; then
+        | grep -q "$pkg"; then
         # NOTE: commit any new changes made to dotfiles as they will be reset
         # if there are any changes detected.
         # TODO: explore a cleaner option than git restore
-        git restore "$DOTFILES/$package/"
+        git restore "$DOTFILES/$pkg/"
       fi
     done
+  fi
+
+  # setup docker
+  if [[ $(yq '.config.configure.apps.docker' $CONFIG) == true ]]; then
+    # https://docs.docker.com/engine/install/linux-postinstall/
+
+    # manage docker as non-root user
+    if ! id --name --groups "$USER" | grep docker &>/dev/null; then
+      # create docker group
+      sudo groupadd docker
+      # add user to docker group
+      sudo usermod -aG docker "$USER"
+      # change group ID to docker to activate change in current shell
+      newgrp docker
+    fi
+
+    # configure docker to start on boot (& right now) with systemd
+    if ! systemctl -q is-active docker.service; then
+      sudo systemctl enable --now docker.service
+    fi
+    if ! systemctl -q is-active containerd.service; then
+      sudo systemctl enable --now containerd.service
+    fi
+
+    # use local logging driver to prevent disk-exhaustion
+    # local logging driver performs log-rotation & compresses log files by 
+    # default.
+    # https://docs.docker.com/config/containers/logging/configure/
+    # https://docs.docker.com/config/containers/logging/local/
+    yq -p=j -n -o=j \
+      '{"log-driver":"local","log-opts":{"max-size":"10m"}}' \
+      | sudo tee /etc/docker/daemon.json >/dev/null
   fi
 }
 

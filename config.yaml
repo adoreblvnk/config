@@ -162,14 +162,17 @@ config:
       zellijClear: true
   configure:
     check: true
-    stowEnabled: true
-    stowMode: backup # override | backup
+    dotfilesEnabled: true
     dotfiles:
-      - alacritty
-      - bash
-      - bottom
-      - codium
-      - macchina
-      - zellij
+      stowMode: backup # override | backup
+      dotfiles:
+        - alacritty
+        - bash
+        - bottom
+        - codium
+        - macchina
+        - zellij
+    apps:
+      docker: true
     theming:
       cinnamon: {}
