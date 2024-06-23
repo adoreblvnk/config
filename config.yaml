@@ -174,7 +174,7 @@ config:
         - zellij
     apps:
       git:
-        userInfo: true # NOTE: set actual contents in secrets.yaml
+        userInfo: false # NOTE: set actual contents in secrets.yaml
       docker: true
     theming:
       cinnamon: {}

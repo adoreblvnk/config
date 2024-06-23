@@ -374,9 +374,11 @@ EOF
     # default.
     # https://docs.docker.com/config/containers/logging/configure/
     # https://docs.docker.com/config/containers/logging/local/
-    yq -p=j -n -o=j \
-      '{"log-driver":"local","log-opts":{"max-size":"10m"}}' \
-      | sudo tee /etc/docker/daemon.json >/dev/null
+    if [[ $(yq -r '.log-driver' /etc/docker/daemon.json) == "local" ]]; then
+      yq -p=j -n -o=j \
+        '{"log-driver":"local","log-opts":{"max-size":"10m"}}' \
+        | sudo tee /etc/docker/daemon.json >/dev/null
+    fi
   fi
 }
 
