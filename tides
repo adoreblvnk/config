@@ -336,7 +336,7 @@ configure() {
     done
   fi
 
-  # setup git user field in gitconfig
+  # setup git user field in gitconfig via ~/.gitconfig.local
   if [[ $(yq '.config.configure.apps.git.userInfo' $CONFIG) == true ]] \
     && [[ ! -s ~/.gitconfig.local ]]; then
     tee ~/.gitconfig.local <<EOF >/dev/null
@@ -379,6 +379,19 @@ EOF
         '{"log-driver":"local","log-opts":{"max-size":"10m"}}' \
         | sudo tee /etc/docker/daemon.json >/dev/null
     fi
+  fi
+
+  # install vscodium extensions
+  if [[ $(yq '.config.configure.apps.vscodium.extensions | length' $CONFIG) -gt 0 ]]; then
+    local extensions
+    mapfile -t extensions < <(
+      yq -r '.config.configure.apps.vscodium.extensions[]' $CONFIG
+    )
+    for ext in "${extensions[@]}"; do
+      # install vscodium extensions
+      # shellcheck disable=SC2086
+      codium --install-extension $ext
+    done
   fi
 }
 
