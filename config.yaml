@@ -2,8 +2,18 @@ version: 0.0.1
 metadata: null
 config:
   check:
-    purgeEnabled: false
-    purge: []
+    purgeEnabled: false # NOTE: this should be true for only the 1st run!
+    purge:
+      # firefox installed via aptAltSources
+      - firefox*
+      # docker installed via aptAltSources
+      - docker.io
+      - docker-doc
+      - docker-compose
+      - docker-compose-v2
+      - podman-docker
+      - containerd
+      - runc
     depsEnabled: false
     deps:
       # essential packages
@@ -53,14 +63,17 @@ config:
       pyenvCheck: true
       version: 3.12
     rustupCheck: true
+    appimagedCheck: true
+    firmware: null
   install:
-    check: true
+    check: false
     aptEnabled: true
     apt:
       # CLI utils
       - fzf
       - gnupg2
       - openssh-server
+      - trash-cli
       - vim
       - xclip
       # apps
@@ -122,9 +135,6 @@ config:
       # - org.gimp.GIMP
       # - org.libreoffice.LibreOffice
       # - org.telegram.desktop
-    pipEnabled: false
-    pip:
-      - trash-cli
     cargoEnabled: false
     cargo:
       - alacritty
@@ -145,7 +155,7 @@ config:
       apt: false
       aptFull: true # NOTE: apt must be true for aptFull to take effect
     flatpak: false
-    pip: true
+    python: true
     cargo: false
     other:
       yq: true

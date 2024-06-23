@@ -18,7 +18,7 @@ Usage: tides [OPTIONS]
 Commands:
   check         Installs dependencies, Python (via pyenv), Cargo (via rustup), & firmware packages
   install, i    Installs all packages. Auto-invokes \`configure\` when done
-  update, u     Updates & upgrades apt, flatpak, cargo, pip packages
+  update, u     Updates & upgrades apt, flatpak, cargo packages
   configure, c  Dotfile manager (via Stow)
   help, h       Print help information
 
@@ -41,6 +41,19 @@ EOF
 }
 
 check() {
+  # purge system
+  if [[ $(yq '.config.check.purgeEnabled' $CONFIG) == true ]]; then
+    # collect purge packages into array
+    local purge_pkgs
+    mapfile -t purge_pkgs < <(
+      yq '.config.check.purge[]' $CONFIG
+    )
+    for pkg in "${purge_pkgs[@]}"; do
+      # shellcheck disable=SC2086
+      sudo apt-get autoremove --purge -qy $pkg
+    done
+  fi
+
   # install deps
   if [[ $(yq '.config.check.depsEnabled' $CONFIG) == true ]]; then
     sudo apt-get update -qq
@@ -70,11 +83,8 @@ check() {
     local latest_py_ver=$(pyenv latest -k "$(yq '.config.check.python.version' $CONFIG)")
     if ! command -v "python$(yq '.config.check.python.version' $CONFIG)" &>/dev/null \
       || [[ $(pyenv version-name) != "$latest_py_ver" ]]; then
-      # freeze deps
-      local deps=$(pip freeze --all | cut -d = -f 1)
       pyenv install "$(yq '.config.check.python.version' $CONFIG)"
       pyenv global "$(yq '.config.check.python.version' $CONFIG)"
-      # TODO: install deps
     fi
   fi
 
@@ -83,6 +93,35 @@ check() {
     && ! command -v rustup &>/dev/null; then
     # yes
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -h
+  fi
+
+  # setup appimaged if appimaged service isn't running / doesn't exist
+  if [[ $(yq '.config.check.appimagedCheck' $CONFIG) == true ]] \
+    && ! systemctl -q --user is-active appimaged; then
+    # https://github.com/probonopd/go-appimage/tree/master/src/appimaged#initial-setup
+
+    # remove pre-existing similar tools
+    systemctl --user stop appimaged.service || true
+    sudo apt-get remove -qy appimagelauncher || true
+
+    # clear cache
+    rm -rf "$HOME"/.local/share/applications/appimage*
+    [ -f ~/.config/systemd/user/default.target.wants/appimagelauncherd.service ] \
+      && rm ~/.config/systemd/user/default.target.wants/appimagelauncherd.service
+
+    # download appimaged
+    mkdir -p "$HOME/Applications"
+    # get continuous release via GitHub api
+    local browser_download_url=$(
+      curl -sSL https://api.github.com/repos/probonopd/go-appimage/releases/tags/continuous \
+        | yq '.assets[] | select(.name == "appimaged*x86_64.AppImage").browser_download_url'
+    )
+    curl -sSL -o "$HOME/Applications/appimaged.AppImage" \
+      "$browser_download_url"
+
+    # launch
+    chmod +x "$HOME/Applications/appimaged.AppImage"
+    $HOME/Applications/appimaged.AppImage
   fi
 }
 
@@ -160,15 +199,6 @@ install() {
     flatpak install -y flathub $(yq '.config.install.flatpak[]' $CONFIG)
   fi
 
-  # install pip cli packages
-  if [[ $(yq '.config.install.pipEnabled' $CONFIG) == true ]] \
-    && [[ $(yq '.config.install.pip | length' $CONFIG) -gt 0 ]] \
-    && command -v pyenv &>/dev/null; then
-    local py_ver="python$(yq '.config.check.python.version' $CONFIG)"
-    # shellcheck disable=SC2046
-    $py_ver -m pip install $(yq '.config.install.pip[]' $CONFIG)
-  fi
-
   # install cargo packages
   if [[ $(yq '.config.install.cargoEnabled' $CONFIG) == true ]] \
     && [[ $(yq '.config.install.cargo | length' $CONFIG) -gt 0 ]] \
@@ -223,11 +253,17 @@ update() {
     flatpak update -y
   fi
 
-  # update pip
-  if [[ $(yq '.config.update.pip' $CONFIG) == true ]] \
+  # update python
+  if [[ $(yq '.config.update.python' $CONFIG) == true ]] \
     && command -v pyenv &>/dev/null; then
-    # TODO: test if pyenv update updates python patch version too
+    # update pyenv
     pyenv update
+    # update python
+    if [[ $(pyenv version-name) != "$latest_py_ver" ]]; then
+      pyenv install "$(yq '.config.check.python.version' $CONFIG)"
+      pyenv global "$(yq '.config.check.python.version' $CONFIG)"
+    fi
+    # update pip
     local py_ver="python$(yq '.config.check.python.version' $CONFIG)"
     $py_ver -m pip install --upgrade pip
   fi
