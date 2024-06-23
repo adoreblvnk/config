@@ -4,13 +4,10 @@ set -euo pipefail
 
 # constants
 readonly DOTFILES="dotfiles/"
-readonly CONFIG="config.yaml"
-readonly SECRETS="secrets.yaml"
-# deps_file="deps.list"
-# install_file="install.list"
-# readonly FILTER_COMMENT='map(select(startswith("#") | not))'
+CONFIG="config.yaml"
+SECRETS="secrets.yaml"
 
-usage() {
+_usage() {
   cat <<EOF
 TIDES (The Idempotent Dev Environment Setup) is a post-install, update, & dotfile manager
 
@@ -34,12 +31,20 @@ Example:
 EOF
 }
 
-error_msg() {
+_error_msg() {
   cat <<EOF
 Error: Invalid argument(s)
 
 EOF
 }
+
+# ----- OPTIONS -----
+
+set_config_file() { CONFIG=$1; }
+
+set_secrets_file() { SECRETS=$1; }
+
+# ----- COMMANDS -----
 
 check() {
   # purge system
@@ -337,8 +342,7 @@ configure() {
   fi
 
   # setup git user field in gitconfig via ~/.gitconfig.local
-  if [[ $(yq '.config.configure.apps.git.userInfo' $CONFIG) == true ]] \
-    && [[ ! -s ~/.gitconfig.local ]]; then
+  if [[ $(yq '.config.configure.apps.git.userInfo' $CONFIG) == true ]]; then
     tee ~/.gitconfig.local <<EOF >/dev/null
 [user]
     name = $(yq '.gitconfig.name' $SECRETS)
@@ -374,7 +378,7 @@ EOF
     # default.
     # https://docs.docker.com/config/containers/logging/configure/
     # https://docs.docker.com/config/containers/logging/local/
-    if [[ $(yq -r '.log-driver' /etc/docker/daemon.json) == "local" ]]; then
+    if [[ "$(yq -r '.log-driver' /etc/docker/daemon.json)" != "local" ]]; then
       yq -p=j -n -o=j \
         '{"log-driver":"local","log-opts":{"max-size":"10m"}}' \
         | sudo tee /etc/docker/daemon.json >/dev/null
@@ -382,7 +386,8 @@ EOF
   fi
 
   # install vscodium extensions
-  if [[ $(yq '.config.configure.apps.vscodium.extensions | length' $CONFIG) -gt 0 ]]; then
+  if [[ $(yq '.config.configure.apps.vscodium.extensionsEnabled' $CONFIG) == true ]] \
+    && [[ $(yq '.config.configure.apps.vscodium.extensions | length' $CONFIG) -gt 0 ]]; then
     local extensions
     mapfile -t extensions < <(
       yq -r '.config.configure.apps.vscodium.extensions[]' $CONFIG
@@ -395,6 +400,8 @@ EOF
   fi
 }
 
+# ----- MAIN -----
+
 main() {
   # download & install yq if not installed
   if ! command -v yq &>/dev/null; then
@@ -404,23 +411,31 @@ main() {
   fi
 
   [[ $# -gt 0 ]] || {
-    usage
-    error_msg
+    _usage
+    _error_msg
     exit 1
   }
 
   while [[ $# -gt 0 ]]; do
     case $1 in
+      -c | --config-file)
+        set_config_file "$2"
+        shift
+        ;;
+      -s | --secrets-file)
+        set_secrets_file "$2"
+        shift
+        ;;
       check) check ;;
-      install | i) install ;;
-      update | u) update ;;
-      configure | c) configure ;;
-      help | h)
-        usage
+      install) install ;;
+      update) update ;;
+      configure) configure ;;
+      -h | --help | h | help)
+        _usage
         ;;
       *)
-        usage
-        error_msg
+        _usage
+        _error_msg
         exit 1
         ;;
     esac
