@@ -173,6 +173,8 @@ config:
         - macchina
         - zellij
     apps:
+      git:
+        userInfo: true # NOTE: set actual contents in secrets.yaml
       docker: true
     theming:
       cinnamon: {}

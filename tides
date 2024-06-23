@@ -5,6 +5,7 @@ set -euo pipefail
 # constants
 readonly DOTFILES="dotfiles/"
 readonly CONFIG="config.yaml"
+readonly SECRETS="secrets.yaml"
 # deps_file="deps.list"
 # install_file="install.list"
 # readonly FILTER_COMMENT='map(select(startswith("#") | not))'
@@ -335,6 +336,17 @@ configure() {
     done
   fi
 
+  # setup git user field in gitconfig
+  if [[ $(yq '.config.configure.apps.git.userInfo' $CONFIG) == true ]] \
+    && [[ ! -s ~/.gitconfig.local ]]; then
+    tee ~/.gitconfig.local <<EOF >/dev/null
+[user]
+    name = $(yq '.gitconfig.name' $SECRETS)
+    email = $(yq '.gitconfig.email' $SECRETS)
+    signingkey = $(yq '.gitconfig.signingkey' $SECRETS)
+EOF
+  fi
+
   # setup docker
   if [[ $(yq '.config.configure.apps.docker' $CONFIG) == true ]]; then
     # https://docs.docker.com/engine/install/linux-postinstall/
@@ -358,7 +370,7 @@ configure() {
     fi
 
     # use local logging driver to prevent disk-exhaustion
-    # local logging driver performs log-rotation & compresses log files by 
+    # local logging driver performs log-rotation & compresses log files by
     # default.
     # https://docs.docker.com/config/containers/logging/configure/
     # https://docs.docker.com/config/containers/logging/local/
