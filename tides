@@ -48,11 +48,11 @@ set_secrets_file() { SECRETS=$1; }
 
 check() {
   # purge system
-  if [[ $(yq '.config.check.purgeEnabled' $CONFIG) == true ]]; then
+  if [[ $(yq '.config.check.purgeEnabled' "$CONFIG") == true ]]; then
     # collect purge packages into array
     local purge_pkgs
     mapfile -t purge_pkgs < <(
-      yq '.config.check.purge[]' $CONFIG
+      yq '.config.check.purge[]' "$CONFIG"
     )
     for pkg in "${purge_pkgs[@]}"; do
       # shellcheck disable=SC2086
@@ -61,14 +61,14 @@ check() {
   fi
 
   # install deps
-  if [[ $(yq '.config.check.depsEnabled' $CONFIG) == true ]]; then
+  if [[ $(yq '.config.check.depsEnabled' "$CONFIG") == true ]]; then
     sudo apt-get update -qq
     # shellcheck disable=SC2046
-    sudo apt-get install -qy $(yq '.config.check.deps[]' $CONFIG)
+    sudo apt-get install -qy $(yq '.config.check.deps[]' "$CONFIG")
   fi
 
   # install pyenv & python version
-  if [[ $(yq '.config.check.python.pyenvCheck' $CONFIG) == true ]]; then
+  if [[ $(yq '.config.check.python.pyenvCheck' "$CONFIG") == true ]]; then
     # install pyenv
     if ! command -v pyenv &>/dev/null; then
       # installs pyenv-installer https://github.com/pyenv/pyenv-installer & the
@@ -86,23 +86,23 @@ check() {
     fi
 
     # install latest python version
-    local latest_py_ver=$(pyenv latest -k "$(yq '.config.check.python.version' $CONFIG)")
-    if ! command -v "python$(yq '.config.check.python.version' $CONFIG)" &>/dev/null \
+    local latest_py_ver=$(pyenv latest -k "$(yq '.config.check.python.version' "$CONFIG")")
+    if ! command -v "python$(yq '.config.check.python.version' "$CONFIG")" &>/dev/null \
       || [[ $(pyenv version-name) != "$latest_py_ver" ]]; then
-      pyenv install "$(yq '.config.check.python.version' $CONFIG)"
-      pyenv global "$(yq '.config.check.python.version' $CONFIG)"
+      pyenv install "$(yq '.config.check.python.version' "$CONFIG")"
+      pyenv global "$(yq '.config.check.python.version' "$CONFIG")"
     fi
   fi
 
   # install rustup, rustc, cargo
-  if [[ $(yq '.config.check.rustupCheck' $CONFIG) == true ]] \
+  if [[ $(yq '.config.check.rustupCheck' "$CONFIG") == true ]] \
     && ! command -v rustup &>/dev/null; then
     # yes
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -h
   fi
 
   # setup appimaged if appimaged service isn't running / doesn't exist
-  if [[ $(yq '.config.check.appimagedCheck' $CONFIG) == true ]] \
+  if [[ $(yq '.config.check.appimagedCheck' "$CONFIG") == true ]] \
     && ! systemctl -q --user is-active appimaged; then
     # https://github.com/probonopd/go-appimage/tree/master/src/appimaged#initial-setup
 
@@ -127,44 +127,44 @@ check() {
 
     # launch
     chmod +x "$HOME/Applications/appimaged.AppImage"
-    $HOME/Applications/appimaged.AppImage
+    "$HOME/Applications/appimaged.AppImage"
   fi
 }
 
 install() {
-  if [[ $(yq '.config.install.check' $CONFIG) == true ]]; then
+  if [[ $(yq '.config.install.check' "$CONFIG") == true ]]; then
     check
   fi
 
   # install apt packages
-  if [[ $(yq '.config.install.aptEnabled' $CONFIG) == true ]] \
-    && [[ $(yq '.config.install.apt | length' $CONFIG) -gt 0 ]]; then
+  if [[ $(yq '.config.install.aptEnabled' "$CONFIG") == true ]] \
+    && [[ $(yq '.config.install.apt | length' "$CONFIG") -gt 0 ]]; then
     sudo apt-get update -qqy
     # shellcheck disable=SC2046
-    sudo apt-get install -qy $(yq '.config.install.apt[]' $CONFIG)
+    sudo apt-get install -qy $(yq '.config.install.apt[]' "$CONFIG")
   fi
 
   # install ppa packages
-  local no_of_ppa_pkgs=$(yq '.config.install.ppa | length' $CONFIG)
-  if [[ $(yq '.config.install.ppaEnabled' $CONFIG) == true ]] \
+  local no_of_ppa_pkgs=$(yq '.config.install.ppa | length' "$CONFIG")
+  if [[ $(yq '.config.install.ppaEnabled' "$CONFIG") == true ]] \
     && [[ $no_of_ppa_pkgs -gt 0 ]]; then
     # add ppa repos (& their gpg keys automatically)
     for ((i = 0; i < no_of_ppa_pkgs; i++)); do
       sudo apt-add-repository -y \
-        "$(yq ".config.install.ppa[$i].ppaUrl" $CONFIG)"
+        "$(yq ".config.install.ppa[$i].ppaUrl" "$CONFIG")"
     done
     sudo apt-get update -q
     # shellcheck disable=SC2046
-    sudo apt-get install -qy $(yq '.config.install.ppa[].packages[]' $CONFIG)
+    sudo apt-get install -qy $(yq '.config.install.ppa[].packages[]' "$CONFIG")
   fi
 
   # install from apt alternative sources
-  local no_of_alt_sources=$(yq '.config.install.aptAltSources | length' $CONFIG)
-  if [[ $(yq '.config.install.aptAltSourcesEnabled' $CONFIG) == true ]] \
+  local no_of_alt_sources=$(yq '.config.install.aptAltSources | length' "$CONFIG")
+  if [[ $(yq '.config.install.aptAltSourcesEnabled' "$CONFIG") == true ]] \
     && [[ $no_of_alt_sources -gt 0 ]]; then
     # setting up signing keys & repo entries
     for ((i = 0; i < no_of_alt_sources; i++)); do
-      local alt_pkg_obj=$(yq ".config.install.aptAltSources[$i]" $CONFIG)
+      local alt_pkg_obj=$(yq ".config.install.aptAltSources[$i]" "$CONFIG")
 
       # download gpg key from remote
       if [[ $(yq '.gpgKeyPath' <<<"$alt_pkg_obj") == *.asc ]]; then
@@ -184,7 +184,7 @@ install() {
       # perform pinning if pinning entry exists
       if [[ $(yq '.pinning' <<<"$alt_pkg_obj") != false ]]; then
         # perform pinning to prioritise
-        local pref_file="/etc/apt/preferences.d/$(yq '.sourceFile' <<<$alt_pkg_obj)"
+        local pref_file="/etc/apt/preferences.d/$(yq '.sourceFile' <<<"$alt_pkg_obj")"
         yq '.pinning' <<<"$alt_pkg_obj" \
           | sudo tee "$pref_file" >/dev/null
       fi
@@ -194,24 +194,24 @@ install() {
     # disable shellcheck to enable installing multiple packages
     # shellcheck disable=SC2046
     sudo apt-get install -qy \
-      $(yq '.config.install.aptAltSources[].packages[]' $CONFIG)
+      $(yq '.config.install.aptAltSources[].packages[]' "$CONFIG")
   fi
 
   # install flatpaks
-  if [[ $(yq '.config.install.flatpakEnabled' $CONFIG) == true ]] \
-    && [[ $(yq '.config.install.flatpak | length' $CONFIG) -gt 0 ]] \
+  if [[ $(yq '.config.install.flatpakEnabled' "$CONFIG") == true ]] \
+    && [[ $(yq '.config.install.flatpak | length' "$CONFIG") -gt 0 ]] \
     && command -v flatpak &>/dev/null; then
     # shellcheck disable=SC2046
-    flatpak install -y flathub $(yq '.config.install.flatpak[]' $CONFIG)
+    flatpak install -y flathub $(yq '.config.install.flatpak[]' "$CONFIG")
   fi
 
   # install cargo packages
-  if [[ $(yq '.config.install.cargoEnabled' $CONFIG) == true ]] \
-    && [[ $(yq '.config.install.cargo | length' $CONFIG) -gt 0 ]] \
+  if [[ $(yq '.config.install.cargoEnabled' "$CONFIG") == true ]] \
+    && [[ $(yq '.config.install.cargo | length' "$CONFIG") -gt 0 ]] \
     && command -v cargo &>/dev/null; then
     local rust_pkgs
     mapfile -t rust_pkgs < <(
-      yq '.config.install.cargo[]' $CONFIG
+      yq '.config.install.cargo[]' "$CONFIG"
     )
     for pkg in "${rust_pkgs[@]}"; do
       # disable to enable installing with options
@@ -221,12 +221,12 @@ install() {
   fi
 
   # install binary packages
-  local no_of_binaries=$(yq '.config.install.binaries | length' $CONFIG)
-  if [[ $(yq '.config.install.binariesEnabled' $CONFIG) == true ]] \
+  local no_of_binaries=$(yq '.config.install.binaries | length' "$CONFIG")
+  if [[ $(yq '.config.install.binariesEnabled' "$CONFIG") == true ]] \
     && [[ $no_of_binaries -gt 0 ]]; then
-    mkdir -p $HOME/Applications
+    mkdir -p "$HOME/Applications"
     for ((i = 0; i < no_of_binaries; i++)); do
-      local binary_obj=$(yq ".config.install.binaries[$i]" $CONFIG)
+      local binary_obj=$(yq ".config.install.binaries[$i]" "$CONFIG")
       if [[ $(yq '.name' <<<"$binary_obj") == *.AppImage ]]; then
         curl -fsSL -o "$HOME/Applications/$(yq '.name' <<<"$binary_obj")" \
           "$(yq '.url' <<<"$binary_obj")"
@@ -237,16 +237,16 @@ install() {
 }
 
 update() {
-  if [[ $(yq '.config.update.check' $CONFIG) == true ]]; then
+  if [[ $(yq '.config.update.check' "$CONFIG") == true ]]; then
     check
   fi
 
-  if [[ $(yq '.config.update.apt.apt' $CONFIG) == true ]]; then
+  if [[ $(yq '.config.update.apt.apt' "$CONFIG") == true ]]; then
     # update apt
     sudo apt-get -qq update
     sudo apt-get -qy upgrade
     # aptFull removes old archive files & unused packages with their config files
-    if [[ $(yq '.config.update.apt.aptFull' $CONFIG) == true ]]; then
+    if [[ $(yq '.config.update.apt.aptFull' "$CONFIG") == true ]]; then
       sudo apt-get -qy dist-upgrade
       sudo apt-get -qy autoclean
       sudo apt-get -qy --purge autoremove
@@ -254,28 +254,29 @@ update() {
   fi
 
   # update flatpak
-  if [[ $(yq '.config.update.flatpak' $CONFIG) == true ]] \
+  if [[ $(yq '.config.update.flatpak' "$CONFIG") == true ]] \
     && command -v flatpak &>/dev/null; then
     flatpak update -y
   fi
 
   # update python
-  if [[ $(yq '.config.update.python' $CONFIG) == true ]] \
+  if [[ $(yq '.config.update.python' "$CONFIG") == true ]] \
     && command -v pyenv &>/dev/null; then
     # update pyenv
     pyenv update
     # update python
+    local latest_py_ver=$(pyenv latest -k "$(yq '.config.check.python.version' "$CONFIG")")
     if [[ $(pyenv version-name) != "$latest_py_ver" ]]; then
-      pyenv install "$(yq '.config.check.python.version' $CONFIG)"
-      pyenv global "$(yq '.config.check.python.version' $CONFIG)"
+      pyenv install "$(yq '.config.check.python.version' "$CONFIG")"
+      pyenv global "$(yq '.config.check.python.version' "$CONFIG")"
     fi
     # update pip
-    local py_ver="python$(yq '.config.check.python.version' $CONFIG)"
+    local py_ver="python$(yq '.config.check.python.version' "$CONFIG")"
     $py_ver -m pip install --upgrade pip
   fi
 
   # update cargo
-  if [[ $(yq '.config.update.cargo' $CONFIG) == true ]] \
+  if [[ $(yq '.config.update.cargo' "$CONFIG") == true ]] \
     && command -v rustup &>/dev/null \
     && command -v cargo &>/dev/null; then
     # update rust first
@@ -285,8 +286,7 @@ update() {
   fi
 
   # update yq
-  if [[ $(yq '.config.update.other.yq' $CONFIG) == true ]]; then
-    echo hihi
+  if [[ $(yq '.config.update.other.yq' "$CONFIG") == true ]]; then
     # get local yq version & parse it
     local_yq_ver=$(yq --version | cut -d ' ' -f 4)
     # get latest yq version
@@ -303,24 +303,24 @@ update() {
   fi
 
   # zellij delete all other sessions, including exited ones
-  if [[ $(yq '.config.update.other.zellijClear' $CONFIG) == true ]] \
+  if [[ $(yq '.config.update.other.zellijClear' "$CONFIG") == true ]] \
     && command -v zellij &>/dev/null; then
     zellij delete-all-sessions -y
   fi
 }
 
 configure() {
-  if [[ $(yq '.config.configure.check' $CONFIG) == true ]]; then
+  if [[ $(yq '.config.configure.check' "$CONFIG") == true ]]; then
     check
   fi
 
   # dotfile manager implementation via Stow
-  if [[ $(yq '.config.configure.dotfilesEnabled' $CONFIG) == true ]] \
-    && [[ $(yq '.config.configure.dotfiles.dotfiles | length' $CONFIG) -gt 0 ]] \
+  if [[ $(yq '.config.configure.dotfilesEnabled' "$CONFIG") == true ]] \
+    && [[ $(yq '.config.configure.dotfiles.dotfiles | length' "$CONFIG") -gt 0 ]] \
     && command -v stow &>/dev/null; then
     local packages
     mapfile -t packages < <(
-      yq -r '.config.configure.dotfiles.dotfiles[]' $CONFIG
+      yq -r '.config.configure.dotfiles.dotfiles[]' "$CONFIG"
     )
     for pkg in "${packages[@]}"; do
       # symlink between tides & actual dotfiles
@@ -330,7 +330,7 @@ configure() {
       # if .config.configure.stowMode is set to "override".
       stow --no-folding --adopt -v -d "dotfiles/" -t "$HOME" "$pkg"
       # override system files with tides' dotfiles
-      if [[ $(yq -r '.config.configure.dotfiles.stowMode' $CONFIG) == "override" ]] \
+      if [[ $(yq -r '.config.configure.dotfiles.stowMode' "$CONFIG") == "override" ]] \
         && git status --porcelain --untracked-files=no $DOTFILES \
         | grep -q "$pkg"; then
         # NOTE: commit any new changes made to dotfiles as they will be reset
@@ -342,17 +342,17 @@ configure() {
   fi
 
   # setup git user field in gitconfig via ~/.gitconfig.local
-  if [[ $(yq '.config.configure.apps.git.userInfo' $CONFIG) == true ]]; then
+  if [[ $(yq '.config.configure.apps.git.userInfo' "$CONFIG") == true ]]; then
     tee ~/.gitconfig.local <<EOF >/dev/null
 [user]
-    name = $(yq '.gitconfig.name' $SECRETS)
-    email = $(yq '.gitconfig.email' $SECRETS)
-    signingkey = $(yq '.gitconfig.signingkey' $SECRETS)
+    name = $(yq '.gitconfig.name' "$SECRETS")
+    email = $(yq '.gitconfig.email' "$SECRETS")
+    signingkey = $(yq '.gitconfig.signingkey' "$SECRETS")
 EOF
   fi
 
   # setup docker
-  if [[ $(yq '.config.configure.apps.docker' $CONFIG) == true ]]; then
+  if [[ $(yq '.config.configure.apps.docker' "$CONFIG") == true ]]; then
     # https://docs.docker.com/engine/install/linux-postinstall/
 
     # manage docker as non-root user
@@ -386,11 +386,11 @@ EOF
   fi
 
   # install vscodium extensions
-  if [[ $(yq '.config.configure.apps.vscodium.extensionsEnabled' $CONFIG) == true ]] \
-    && [[ $(yq '.config.configure.apps.vscodium.extensions | length' $CONFIG) -gt 0 ]]; then
+  if [[ $(yq '.config.configure.apps.vscodium.extensionsEnabled' "$CONFIG") == true ]] \
+    && [[ $(yq '.config.configure.apps.vscodium.extensions | length' "$CONFIG") -gt 0 ]]; then
     local extensions
     mapfile -t extensions < <(
-      yq -r '.config.configure.apps.vscodium.extensions[]' $CONFIG
+      yq -r '.config.configure.apps.vscodium.extensions[]' "$CONFIG"
     )
     for ext in "${extensions[@]}"; do
       # install vscodium extensions
