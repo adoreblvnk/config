@@ -1,4 +1,12 @@
 # bash better auto-completion from `man readline`
-set show-all-if-ambiguous on
 set completion-ignore-case on
-set completion-map-case on
+set show-all-if-ambiguous on
+TAB:menu-complete
+
+# up & down arrow to search history based on current string
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+
+# coloured options shown when completions are triggered
+set colored-completion-prefix on
+set colored-stats on

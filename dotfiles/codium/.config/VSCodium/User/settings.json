@@ -19,6 +19,8 @@
     },
     "codesnap.showLineNumbers": false,
     "editor.cursorBlinking": "expand",
+    "editor.fontFamily": "'GeistMono Nerd Font', 'Droid Sans Mono', 'monospace', monospace",
+    "editor.fontLigatures": true,
     "editor.fontSize": 16,
     "editor.minimap.enabled": false,
     "editor.multiCursorModifier": "ctrlCmd",

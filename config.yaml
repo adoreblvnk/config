@@ -64,6 +64,8 @@ config:
       version: 3.12
     rustupCheck: true
     appimagedCheck: true
+    nerdfontEnabled: true
+    nerdfont: GeistMono # list of fonts: https://www.nerdfonts.com/font-downloads
     firmware: null
   install:
     check: true

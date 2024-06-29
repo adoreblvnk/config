@@ -129,6 +129,18 @@ check() {
     chmod +x "$HOME/Applications/appimaged.AppImage"
     "$HOME/Applications/appimaged.AppImage"
   fi
+
+  # install nerdfont
+  if [[ $(yq '.config.check.nerdfontEnabled' "$CONFIG") == true ]]; then
+    local font=$(yq '.config.check.nerdfont' "$CONFIG")
+    if [[ ! -d "/usr/share/fonts/$font" ]]; then
+      sudo mkdir -p "/usr/share/fonts/$font"
+      curl -sSL \
+        "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/$font.tar.xz" \
+        | sudo tar -xvJ -C "/usr/share/fonts/$font"
+    fi
+    fc-cache -vf
+  fi
 }
 
 install() {

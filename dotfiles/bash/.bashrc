@@ -116,21 +116,6 @@ if ! shopt -oq posix; then
   fi
 fi
 
-# bash prompt w/ git branch
-if [ ! -f ~/.git-prompt.sh ]; then
-  curl -fsLS -o ~/.git-prompt.sh \
-    https://github.com/git/git/raw/master/contrib/completion/git-prompt.sh
-fi
-source ~/.git-prompt.sh
-# display chroot name if in chroot
-PS1='${debian_chroot:+($debian_chroot)}'
-# add working directory
-PS1+='\[\033[01;34m\]\w\[\033[00m\]'
-# add git branch if exists
-PS1+='\[\033[01;33m\]$(__git_ps1)\[\033[00m\] '
-# prompt symbol
-PS1+='\[\033[01;35m\]\$\[\033[00m\] '
-
 # force GPG to use pinentry (console) to prompt for passwords instead of a
 # window as per `man gpg-agent`
 export GPG_TTY=$(tty)
@@ -152,11 +137,18 @@ if command -v alacritty &>/dev/null; then
   source ~/.bash_completion/alacritty
 fi
 
-# https://github.com/ajeetdsouza/zoxide?tab=readme-ov-file#installation
-if command -v zoxide &>/dev/null; then eval "$(zoxide init bash)"; fi
+if command -v starship >/dev/null; then eval "$(starship init bash)"; fi
 
 if command -v zellij &>/dev/null; then
   export ZELLIJ_AUTO_EXIT=true
   # https://zellij.dev/documentation/integration#bash
   eval "$(zellij setup --generate-auto-start bash)"
+fi
+
+# https://github.com/ajeetdsouza/zoxide?tab=readme-ov-file#installation
+if command -v zoxide &>/dev/null; then eval "$(zoxide init bash)"; fi
+
+if command -v macchina &>/dev/null; then
+  macchina -t Minimal -o host -o kernel -o distribution -o uptime \
+    -o processor-load -o memory
 fi
