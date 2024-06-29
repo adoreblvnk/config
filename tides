@@ -138,8 +138,8 @@ check() {
       curl -sSL \
         "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/$font.tar.xz" \
         | sudo tar -xvJ -C "/usr/share/fonts/$font"
+      fc-cache -vf
     fi
-    fc-cache -vf
   fi
 }
 

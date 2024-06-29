@@ -173,6 +173,7 @@ config:
         - bottom
         - codium
         - macchina
+        - starship
         - zellij
     apps:
       git:
