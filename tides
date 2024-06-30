@@ -51,9 +51,7 @@ check() {
   if [[ $(yq '.config.check.purgeEnabled' "$CONFIG") == true ]]; then
     # collect purge packages into array
     local purge_pkgs
-    mapfile -t purge_pkgs < <(
-      yq '.config.check.purge[]' "$CONFIG"
-    )
+    mapfile -t purge_pkgs < <(yq '.config.check.purge[]' "$CONFIG")
     for pkg in "${purge_pkgs[@]}"; do
       # shellcheck disable=SC2086
       sudo apt-get autoremove --purge -qy $pkg
@@ -222,9 +220,7 @@ install() {
     && [[ $(yq '.config.install.cargo | length' "$CONFIG") -gt 0 ]] \
     && command -v cargo &>/dev/null; then
     local rust_pkgs
-    mapfile -t rust_pkgs < <(
-      yq '.config.install.cargo[]' "$CONFIG"
-    )
+    mapfile -t rust_pkgs < <(yq '.config.install.cargo[]' "$CONFIG")
     for pkg in "${rust_pkgs[@]}"; do
       # disable to enable installing with options
       # shellcheck disable=SC2086
