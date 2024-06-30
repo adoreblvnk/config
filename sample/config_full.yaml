@@ -64,6 +64,8 @@ config:
       version: 3.12
     rustupCheck: true
     appimagedCheck: true
+    nerdfontEnabled: true
+    nerdfont: GeistMono # list of fonts: https://www.nerdfonts.com/font-downloads
     firmware: null
   install:
     check: true
@@ -82,7 +84,7 @@ config:
       - imagemagick
       - vlc
       # productivity
-    ppaEnabled: true
+    ppaEnabled: false
     ppa:
       - ppaUrl: ppa:qbittorrent-team/qbittorrent-stable
         packages:
@@ -171,6 +173,7 @@ config:
         - bottom
         - codium
         - macchina
+        - starship
         - zellij
     apps:
       git:

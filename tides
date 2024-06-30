@@ -111,7 +111,7 @@ check() {
     sudo apt-get remove -qy appimagelauncher || true
 
     # clear cache
-    rm -rf "$HOME"/.local/share/applications/appimage*
+    rm -rf "$HOME/.local/share/applications/appimage*"
     [ -f ~/.config/systemd/user/default.target.wants/appimagelauncherd.service ] \
       && rm ~/.config/systemd/user/default.target.wants/appimagelauncherd.service
 
@@ -369,8 +369,13 @@ configure() {
 [user]
     name = $(yq '.gitconfig.name' "$SECRETS")
     email = $(yq '.gitconfig.email' "$SECRETS")
+EOF
+    # add signingkey if field exists
+    if [[ -n $(yq '.gitconfig.signingkey' secrets.yaml) ]]; then
+      tee -a ~/.gitconfig.local <<EOF >/dev/null
     signingkey = $(yq '.gitconfig.signingkey' "$SECRETS")
 EOF
+    fi
   fi
 
   # setup docker
