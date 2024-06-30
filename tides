@@ -120,7 +120,7 @@ check() {
     # get continuous release via GitHub api
     local browser_download_url=$(
       curl -sSL https://api.github.com/repos/probonopd/go-appimage/releases/tags/continuous \
-        | yq '.assets[] | select(.name == "appimaged*x86_64.AppImage").browser_download_url'
+        | yq '.assets[].browser_download_url | select(. == "*appimaged*x86_64.AppImage")'
     )
     curl -sSL -o "$HOME/Applications/appimaged.AppImage" \
       "$browser_download_url"
@@ -239,9 +239,19 @@ install() {
     mkdir -p "$HOME/Applications"
     for ((i = 0; i < no_of_binaries; i++)); do
       local binary_obj=$(yq ".config.install.binaries[$i]" "$CONFIG")
+      # skip if binary exists
+      if [[ -f "$HOME/Applications/$(yq '.name' <<<"$binary_obj")" ]]; then
+        continue
+      fi
+      # install AppImage
       if [[ $(yq '.name' <<<"$binary_obj") == *.AppImage ]]; then
+        local download_url="$(yq '.url' <<<"$binary_obj")"
+        # execute string as subshell if subshell detected
+        if grep -Eq '\$\(.*\)' <<<"$(yq '.url' <<<"$binary_obj")"; then
+          download_url="$(eval echo "$(yq '.url' <<<"$binary_obj")")"
+        fi
         curl -fsSL -o "$HOME/Applications/$(yq '.name' <<<"$binary_obj")" \
-          "$(yq '.url' <<<"$binary_obj")"
+          "$download_url"
         chmod +x "$HOME/Applications/$(yq '.name' <<<"$binary_obj")"
       fi
     done

@@ -147,10 +147,12 @@ config:
       - starship --locked
       - zellij --locked
       - zoxide --locked
-    binariesEnabled: false
+    binariesEnabled: true
     binaries:
       - name: Bitwarden.AppImage
         url: https://vault.bitwarden.com/download/?app=desktop&platform=linux&variant=appimage
+      - name: YouTube-Music.AppImage
+        url: $(curl -sSL https://api.github.com/repos/th-ch/youtube-music/releases/latest | yq '.assets[].browser_download_url | select(. == "*AppImage")')
   update:
     check: true
     apt:
