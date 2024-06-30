@@ -3,8 +3,9 @@ add_newline = false
 palette = "catppuccin_frappe"
 
 [character]
+# NOTE: replaced maroon with sky to better discern success & error
 # Note the use of Catppuccin color 'maroon'
-success_symbol = "[❯](green)"
+success_symbol = "[[♥](green) ❯](sky)"
 error_symbol = "[❯](red)"
 vimcmd_symbol = "[❮](green)"
 
